@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Стоматологія — онлайн-запис{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+{% endblock %}
+
+{% block body_class %}page-landing{% endblock %}
+
+{% block content %}
+
+  <div class="landing-banner">
+    <img src="{% static 'img/baner_stormmm.webp' %}" alt="Стоматологічна клініка" class="landing-banner__img">
+  </div>
+
+<section class="landing-hero">
+  <div class="landing-hero__inner">
+    <div class="landing-hero__text">
+      <h1 class="landing-hero__title">Стоматологія для усмішки без страху</h1>
+      <p class="landing-hero__subtitle">
+        Сучасне лікування, комфортні кабінети та можливість онлайн-запису в декілька кліків.
+      </p>
+      <div class="landing-hero__actions">
+        <a href="#online-booking" class="btn btn--primary">Записатись онлайн</a>
+        <a href="{% url 'login' %}" class="btn btn--ghost">Вхід в кабінет</a>
+      </div>
+    </div>
+    <div class="landing-hero__info">
+      <h2 class="landing-hero__info-title">Наші філії</h2>
+      <ul class="landing-branches-list">
+        {% for branch in branches %}
+          <li class="landing-branches-list__item">
+            <div class="branch-card">
+              <div class="branch-card__name">{{ branch.name }}</div>
+              <div class="branch-card__city">{{ branch.city }}</div>
+              <div class="branch-card__address">{{ branch.address }}</div>
+              {% if branch.phone_main %}
+                <div class="branch-card__phone">Тел: {{ branch.phone_main }}</div>
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="online-booking" class="landing-booking">
+  <div class="landing-booking__inner">
+    <div class="landing-booking__left">
+      <h2>Популярні послуги</h2>
+      <ul class="services-list">
+        {% for service in services %}
+          <li class="services-list__item">
+            <div class="service-card">
+              <div class="service-card__name">{{ service.name }}</div>
+              {% if service.price_from %}
+                <div class="service-card__price">від {{ service.price_from }} грн</div>
+              {% endif %}
+              {% if service.description %}
+                <div class="service-card__desc">{{ service.description|truncatewords:20 }}</div>
+              {% endif %}
+            </div>
+          </li>
+        {% empty %}
+          <li>Послуги ще не додані.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="landing-booking__right">
+      <div class="booking-box"
+           id="booking-box"
+           data-api-day-schedule-url="{% url 'api_day_schedule' %}"
+           data-api-create-appointment-url="{% url 'api_create_appointment' %}"
+           data-is-authenticated="{{ request.user.is_authenticated|yesno:'1,0' }}">
+        <div class="booking-box__header">
+          <h2 class="booking-box__title">Онлайн-запис</h2>
+          <button type="button" class="booking-box__toggle" data-booking-toggle>
+            Записатися
+          </button>
+          <button type="button" class="booking-box__close" data-booking-close>
+            ✕
+          </button>
+        </div>
+
+        <p class="booking-box__subtitle">
+          Оберіть філію, дату в календарі та вільний час. Для запису потрібен акаунт пацієнта.
+        </p>
+
+        <!-- Фільтри та дата -->
+        <div class="booking-filters">
+          <div class="booking-filters__field">
+            <label for="booking-branch-select">Філія</label>
+            <select id="booking-branch-select" class="booking-select">
+              <option value="">Усі філії</option>
+              {% for branch in branches %}
+                <option value="{{ branch.id }}">{{ branch.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="booking-filters__field">
+            <label>Дата</label>
+            <button type="button" class="booking-date-btn" data-open-calendar>
+              <span class="booking-date-btn__label" data-selected-date-label>Оберіть дату</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Календар -->
+        <div class="booking-calendar" data-calendar>
+          <div class="booking-calendar__header">
+            <button type="button" class="booking-calendar__nav" data-cal-prev>&lt;</button>
+            <div class="booking-calendar__month" data-cal-month-label>...</div>
+            <button type="button" class="booking-calendar__nav" data-cal-next>&gt;</button>
+          </div>
+          <div class="booking-calendar__weekdays">
+            <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Нд</span>
+          </div>
+          <div class="booking-calendar__grid" data-cal-grid>
+            <!-- дні місяця JS-ом -->
+          </div>
+        </div>
+
+        <!-- Сітка часу / лікарів -->
+        <div class="booking-schedule" data-schedule>
+          <div class="booking-schedule__top">
+            <div class="booking-schedule__date" data-schedule-date-label></div>
+            <div class="booking-schedule__hint">
+              Клікніть по вільному часу, щоб записатися.
+            </div>
+          </div>
+
+          <div class="booking-schedule__grid">
+            <div class="schedule-grid">
+              <div class="schedule-grid__corner">Час / Лікар</div>
+              <div class="schedule-grid__doctors" data-schedule-doctors></div>
+              <div class="schedule-grid__body">
+                <div class="schedule-grid__times" data-schedule-times></div>
+                <div class="schedule-grid__cells" data-schedule-cells></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Модалка запису -->
+        <div class="booking-modal" data-booking-modal>
+          <div class="booking-modal__backdrop" data-booking-modal-close></div>
+          <div class="booking-modal__dialog">
+            <button type="button" class="booking-modal__close" data-booking-modal-close>✕</button>
+            <h3 class="booking-modal__title">Підтвердження запису</h3>
+            <p class="booking-modal__summary" data-booking-summary></p>
+
+            <form class="booking-modal__form" data-booking-form>
+              <input type="hidden" name="date" data-booking-date-input>
+              <input type="hidden" name="time" data-booking-time-input>
+              <input type="hidden" name="branch_id" data-booking-branch-input>
+              <input type="hidden" name="doctor_id" data-booking-doctor-input>
+
+              <div class="booking-modal__field">
+                <label for="booking-service-select">Послуга (опційно)</label>
+                <select id="booking-service-select" name="service_id" class="booking-select">
+                  <option value="">Не обрано</option>
+                  {% for service in services %}
+                    <option value="{{ service.id }}">{{ service.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="booking-modal__field">
+                <label for="booking-note">Коментар / опис проблеми</label>
+                <textarea id="booking-note" name="note" rows="3" class="booking-textarea"
+                          placeholder="Коротко опишіть, що турбує..."></textarea>
+              </div>
+
+              <div class="booking-modal__footer">
+                <p class="booking-modal__hint" data-booking-hint>
+                  Ваші контактні дані будуть використані з профілю пацієнта.
+                </p>
+                <button type="submit" class="booking-modal__submit">
+                  Підтвердити запис
+                </button>
+              </div>
+
+              <div class="booking-modal__error" data-booking-error></div>
+              <div class="booking-modal__success" data-booking-success></div>
+            </form>
+          </div>
+        </div>
+
+        {% if not request.user.is_authenticated %}
+          <p class="booking-box__auth-hint">
+            Щоб завершити запис, будь ласка, <a href="{% url 'login' %}">увійдіть</a> або
+            <a href="{% url 'register' %}">зареєструйтесь</a>.
+          </p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/landing.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,174 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Стоматологія{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Базові стилі для всіх сторінок -->
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="page-{{ page_id|default:'default' }} {% block body_class %}{% endblock %}">
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="site-header__logo">
+      <a href="{% url 'index' %}">StomaClinic</a>
+    </div>
+
+    <nav class="site-header__nav">
+      <a href="{% url 'index' %}" class="nav-link">Головна</a>
+    </nav>
+
+    <!-- Меню користувача з іконкою зуба -->
+    <div class="user-menu" data-user-menu>
+      <button class="user-menu__toggle" type="button" aria-expanded="false" aria-label="Меню користувача">
+        <!-- ТВОЙ ЗУБ, но управляем размером через CSS -->
+        <svg class="user-menu__tooth-icon user-menu__tooth-icon--button" viewBox="0 0 75 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M47.6287 1.56851C41.7415 4.00827 33.2447 4.00825 27.3575 1.56849C22.5743 -0.413791 17.2239 -0.597616 12.2871 1.47954C1.86886 5.86298 -2.80392 18.6728 1.73051 30.2284C1.73151 30.2309 1.73147 30.2338 1.73037 30.2363L3.14541 33.2126C7.9287 43.2733 11.5342 53.8197 13.8947 64.6554L16.1401 74.9631C16.9172 77.9262 19.6632 80 22.8098 80C26.1893 80 29.0689 77.6157 29.6054 74.3732L32.771 55.2414C33.1438 52.9882 35.1448 51.3313 37.4932 51.3313C39.8417 51.3313 41.8427 52.9882 42.2155 55.2415L45.381 74.3731C45.9175 77.6157 48.7971 80 52.1766 80C55.3232 80 58.0692 77.9262 58.8463 74.9631L61.0917 64.6554C63.4522 53.8197 67.0577 43.2733 71.841 33.2125L73.256 30.2363C73.2549 30.2338 73.2549 30.2309 73.2559 30.2284C77.7903 18.6728 73.1175 5.86298 62.6993 1.47954C57.7625 -0.597638 52.412 -0.413802 47.6287 1.56851Z" fill="white"/>
+          <g filter="url(#filter0_i_102_28)">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M75 24.5615H0L0 20.5615H26V24.5615H49V20.5615H75V24.5615Z" fill="#58F9FF"/>
+          </g>
+          <g filter="url(#filter1_i_102_28)">
+            <path d="M26 21.5C26 15.1487 31.1487 10 37.5 10V10C43.8513 10 49 15.1487 49 21.5V25.5C49 31.8513 43.8513 37 37.5 37V37C31.1487 37 26 31.8513 26 25.5V21.5Z" fill="#58FFFF" fill-opacity="0.74"/>
+          </g>
+          <defs>
+            <filter id="filter0_i_102_28" x="0" y="20.5615" width="75" height="8" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+              <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+              <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+              <feOffset dy="4"/>
+              <feGaussianBlur stdDeviation="2"/>
+              <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+              <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+              <feBlend mode="normal" in2="shape" result="effect1_innerShadow_102_28"/>
+            </filter>
+            <filter id="filter1_i_102_28" x="26" y="10" width="23" height="31" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+              <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+              <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+              <feOffset dy="4"/>
+              <feGaussianBlur stdDeviation="2"/>
+              <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+              <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+              <feBlend mode="normal" in2="shape" result="effect1_innerShadow_102_28"/>
+            </filter>
+          </defs>
+        </svg>
+      </button>
+
+      <div class="user-menu__panel">
+        {% if user.is_authenticated %}
+          <a href="{% url 'patient_dashboard' %}" class="user-menu__item">
+            <span class="user-menu__item-icon">
+              <svg class="user-menu__tooth-icon user-menu__tooth-icon--item" viewBox="0 0 75 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M47.6287 1.56851C41.7415 4.00827 33.2447 4.00825 27.3575 1.56849C22.5743 -0.413791 17.2239 -0.597616 12.2871 1.47954C1.86886 5.86298 -2.80392 18.6728 1.73051 30.2284C1.73151 30.2309 1.73147 30.2338 1.73037 30.2363L3.14541 33.2126C7.9287 43.2733 11.5342 53.8197 13.8947 64.6554L16.1401 74.9631C16.9172 77.9262 19.6632 80 22.8098 80C26.1893 80 29.0689 77.6157 29.6054 74.3732L32.771 55.2414C33.1438 52.9882 35.1448 51.3313 37.4932 51.3313C39.8417 51.3313 41.8427 52.9882 42.2155 55.2415L45.381 74.3731C45.9175 77.6157 48.7971 80 52.1766 80C55.3232 80 58.0692 77.9262 58.8463 74.9631L61.0917 64.6554C63.4522 53.8197 67.0577 43.2733 71.841 33.2125L73.256 30.2363C73.2549 30.2338 73.2549 30.2309 73.2559 30.2284C77.7903 18.6728 73.1175 5.86298 62.6993 1.47954C57.7625 -0.597638 52.412 -0.413802 47.6287 1.56851Z" fill="white"/>
+                <g filter="url(#filter0_i_102_28)">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M75 24.5615H0L0 20.5615H26V24.5615H49V20.5615H75V24.5615Z" fill="#58F9FF"/>
+                </g>
+                <g filter="url(#filter1_i_102_28)">
+                  <path d="M26 21.5C26 15.1487 31.1487 10 37.5 10V10C43.8513 10 49 15.1487 49 21.5V25.5C49 31.8513 43.8513 37 37.5 37V37C31.1487 37 26 31.8513 26 25.5V21.5Z" fill="#58FFFF" fill-opacity="0.74"/>
+                </g>
+              </svg>
+            </span>
+            <span class="user-menu__item-text">Кабінет пацієнта</span>
+          </a>
+
+          <a href="{% url 'doctor_dashboard' %}" class="user-menu__item">
+            <span class="user-menu__item-icon">
+              <svg class="user-menu__tooth-icon user-menu__tooth-icon--item" viewBox="0 0 75 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M47.6287 1.56851C41.7415 4.00827 33.2447 4.00825 27.3575 1.56849C22.5743 -0.413791 17.2239 -0.597616 12.2871 1.47954C1.86886 5.86298 -2.80392 18.6728 1.73051 30.2284C1.73151 30.2309 1.73147 30.2338 1.73037 30.2363L3.14541 33.2126C7.9287 43.2733 11.5342 53.8197 13.8947 64.6554L16.1401 74.9631C16.9172 77.9262 19.6632 80 22.8098 80C26.1893 80 29.0689 77.6157 29.6054 74.3732L32.771 55.2414C33.1438 52.9882 35.1448 51.3313 37.4932 51.3313C39.8417 51.3313 41.8427 52.9882 42.2155 55.2415L45.381 74.3731C45.9175 77.6157 48.7971 80 52.1766 80C55.3232 80 58.0692 77.9262 58.8463 74.9631L61.0917 64.6554C63.4522 53.8197 67.0577 43.2733 71.841 33.2125L73.256 30.2363C73.2549 30.2338 73.2549 30.2309 73.2559 30.2284C77.7903 18.6728 73.1175 5.86298 62.6993 1.47954C57.7625 -0.597638 52.412 -0.413802 47.6287 1.56851Z" fill="white"/>
+                <g filter="url(#filter0_i_102_28)">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M75 24.5615H0L0 20.5615H26V24.5615H49V20.5615H75V24.5615Z" fill="#58F9FF"/>
+                </g>
+                <g filter="url(#filter1_i_102_28)">
+                  <path d="M26 21.5C26 15.1487 31.1487 10 37.5 10V10C43.8513 10 49 15.1487 49 21.5V25.5C49 31.8513 43.8513 37 37.5 37V37C31.1487 37 26 31.8513 26 25.5V21.5Z" fill="#58FFFF" fill-opacity="0.74"/>
+                </g>
+              </svg>
+            </span>
+            <span class="user-menu__item-text">Кабінет лікаря</span>
+          </a>
+
+          <a href="{% url 'logout' %}" class="user-menu__item user-menu__item--secondary">
+            <span class="user-menu__item-icon">
+              <svg class="user-menu__tooth-icon user-menu__tooth-icon--item" viewBox="0 0 75 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M47.6287 1.56851C41.7415 4.00827 33.2447 4.00825 27.3575 1.56849C22.5743 -0.413791 17.2239 -0.597616 12.2871 1.47954C1.86886 5.86298 -2.80392 18.6728 1.73051 30.2284C1.73151 30.2309 1.73147 30.2338 1.73037 30.2363L3.14541 33.2126C7.9287 43.2733 11.5342 53.8197 13.8947 64.6554L16.1401 74.9631C16.9172 77.9262 19.6632 80 22.8098 80C26.1893 80 29.0689 77.6157 29.6054 74.3732L32.771 55.2414C33.1438 52.9882 35.1448 51.3313 37.4932 51.3313C39.8417 51.3313 41.8427 52.9882 42.2155 55.2415L45.381 74.3731C45.9175 77.6157 48.7971 80 52.1766 80C55.3232 80 58.0692 77.9262 58.8463 74.9631L61.0917 64.6554C63.4522 53.8197 67.0577 43.2733 71.841 33.2125L73.256 30.2363C73.2549 30.2338 73.2549 30.2309 73.2559 30.2284C77.7903 18.6728 73.1175 5.86298 62.6993 1.47954C57.7625 -0.597638 52.412 -0.413802 47.6287 1.56851Z" fill="white"/>
+                <g filter="url(#filter0_i_102_28)">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M75 24.5615H0L0 20.5615H26V24.5615H49V20.5615H75V24.5615Z" fill="#58F9FF"/>
+                </g>
+                <g filter="url(#filter1_i_102_28)">
+                  <path d="M26 21.5C26 15.1487 31.1487 10 37.5 10V10C43.8513 10 49 15.1487 49 21.5V25.5C49 31.8513 43.8513 37 37.5 37V37C31.1487 37 26 31.8513 26 25.5V21.5Z" fill="#58FFFF" fill-opacity="0.74"/>
+                </g>
+              </svg>
+            </span>
+            <span class="user-menu__item-text">Вийти</span>
+          </a>
+        {% else %}
+          <a href="{% url 'login' %}" class="user-menu__item">
+            <span class="user-menu__item-icon">
+              <svg class="user-menu__tooth-icon user-menu__tooth-icon--item" viewBox="0 0 75 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M47.6287 1.56851C41.7415 4.00827 33.2447 4.00825 27.3575 1.56849C22.5743 -0.413791 17.2239 -0.597616 12.2871 1.47954C1.86886 5.86298 -2.80392 18.6728 1.73051 30.2284C1.73151 30.2309 1.73147 30.2338 1.73037 30.2363L3.14541 33.2126C7.9287 43.2733 11.5342 53.8197 13.8947 64.6554L16.1401 74.9631C16.9172 77.9262 19.6632 80 22.8098 80C26.1893 80 29.0689 77.6157 29.6054 74.3732L32.771 55.2414C33.1438 52.9882 35.1448 51.3313 37.4932 51.3313C39.8417 51.3313 41.8427 52.9882 42.2155 55.2415L45.381 74.3731C45.9175 77.6157 48.7971 80 52.1766 80C55.3232 80 58.0692 77.9262 58.8463 74.9631L61.0917 64.6554C63.4522 53.8197 67.0577 43.2733 71.841 33.2125L73.256 30.2363C73.2549 30.2338 73.2549 30.2309 73.2559 30.2284C77.7903 18.6728 73.1175 5.86298 62.6993 1.47954C57.7625 -0.597638 52.412 -0.413802 47.6287 1.56851Z" fill="white"/>
+                <g filter="url(#filter0_i_102_28)">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M75 24.5615H0L0 20.5615H26V24.5615H49V20.5615H75V24.5615Z" fill="#58F9FF"/>
+                </g>
+                <g filter="url(#filter1_i_102_28)">
+                  <path d="M26 21.5C26 15.1487 31.1487 10 37.5 10V10C43.8513 10 49 15.1487 49 21.5V25.5C49 31.8513 43.8513 37 37.5 37V37C31.1487 37 26 31.8513 26 25.5V21.5Z" fill="#58FFFF" fill-opacity="0.74"/>
+                </g>
+              </svg>
+            </span>
+            <span class="user-menu__item-text">Вхід</span>
+          </a>
+
+          <a href="{% url 'register' %}" class="user-menu__item">
+            <span class="user-menu__item-icon">
+              <svg class="user-menu__tooth-icon user-menu__tooth-icon--item" viewBox="0 0 75 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M47.6287 1.56851C41.7415 4.00827 33.2447 4.00825 27.3575 1.56849C22.5743 -0.413791 17.2239 -0.597616 12.2871 1.47954C1.86886 5.86298 -2.80392 18.6728 1.73051 30.2284C1.73151 30.2309 1.73147 30.2338 1.73037 30.2363L3.14541 33.2126C7.9287 43.2733 11.5342 53.8197 13.8947 64.6554L16.1401 74.9631C16.9172 77.9262 19.6632 80 22.8098 80C26.1893 80 29.0689 77.6157 29.6054 74.3732L32.771 55.2414C33.1438 52.9882 35.1448 51.3313 37.4932 51.3313C39.8417 51.3313 41.8427 52.9882 42.2155 55.2415L45.381 74.3731C45.9175 77.6157 48.7971 80 52.1766 80C55.3232 80 58.0692 77.9262 58.8463 74.9631L61.0917 64.6554C63.4522 53.8197 67.0577 43.2733 71.841 33.2125L73.256 30.2363C73.2549 30.2338 73.2549 30.2309 73.2559 30.2284C77.7903 18.6728 73.1175 5.86298 62.6993 1.47954C57.7625 -0.597638 52.412 -0.413802 47.6287 1.56851Z" fill="white"/>
+                <g filter="url(#filter0_i_102_28)">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M75 24.5615H0L0 20.5615H26V24.5615H49V20.5615H75V24.5615Z" fill="#58F9FF"/>
+                </g>
+                <g filter="url(#filter1_i_102_28)">
+                  <path d="M26 21.5C26 15.1487 31.1487 10 37.5 10V10C43.8513 10 49 15.1487 49 21.5V25.5C49 31.8513 43.8513 37 37.5 37V37C31.1487 37 26 31.8513 26 25.5V21.5Z" fill="#58FFFF" fill-opacity="0.74"/>
+                </g>
+              </svg>
+            </span>
+            <span class="user-menu__item-text">Реєстрація</span>
+          </a>
+
+          <a href="/admin/" class="user-menu__item user-menu__item--secondary">
+            <span class="user-menu__item-icon">
+              <svg class="user-menu__tooth-icon user-menu__tooth-icon--item" viewBox="0 0 75 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M47.6287 1.56851C41.7415 4.00827 33.2447 4.00825 27.3575 1.56849C22.5743 -0.413791 17.2239 -0.597616 12.2871 1.47954C1.86886 5.86298 -2.80392 18.6728 1.73051 30.2284C1.73151 30.2309 1.73147 30.2338 1.73037 30.2363L3.14541 33.2126C7.9287 43.2733 11.5342 53.8197 13.8947 64.6554L16.1401 74.9631C16.9172 77.9262 19.6632 80 22.8098 80C26.1893 80 29.0689 77.6157 29.6054 74.3732L32.771 55.2414C33.1438 52.9882 35.1448 51.3313 37.4932 51.3313C39.8417 51.3313 41.8427 52.9882 42.2155 55.2415L45.381 74.3731C45.9175 77.6157 48.7971 80 52.1766 80C55.3232 80 58.0692 77.9262 58.8463 74.9631L61.0917 64.6554C63.4522 53.8197 67.0577 43.2733 71.841 33.2125L73.256 30.2363C73.2549 30.2338 73.2549 30.2309 73.2559 30.2284C77.7903 18.6728 73.1175 5.86298 62.6993 1.47954C57.7625 -0.597638 52.412 -0.413802 47.6287 1.56851Z" fill="white"/>
+                <g filter="url(#filter0_i_102_28)">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M75 24.5615H0L0 20.5615H26V24.5615H49V20.5615H75V24.5615Z" fill="#58F9FF"/>
+                </g>
+                <g filter="url(#filter1_i_102_28)">
+                  <path d="M26 21.5C26 15.1487 31.1487 10 37.5 10V10C43.8513 10 49 15.1487 49 21.5V25.5C49 31.8513 43.8513 37 37.5 37V37C31.1487 37 26 31.8513 26 25.5V21.5Z" fill="#58FFFF" fill-opacity="0.74"/>
+                </g>
+              </svg>
+            </span>
+            <span class="user-menu__item-text">Вхід для адміністратора</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</header>
+
+
+<main class="page-content">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <p>© {{ now|date:"Y" }} StomaClinic. Всі права захищені.</p>
+  </div>
+</footer>
+
+<script src="{% static 'js/base.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

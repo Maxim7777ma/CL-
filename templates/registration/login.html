@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Вхід в кабінет{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block body_class %}page-login{% endblock %}
+
+{% block content %}
+<section class="login-page">
+  <div class="login-page__inner">
+    <div class="login-card">
+
+      <h1 class="login-card__title">Вхід в кабінет</h1>
+      <p class="login-card__subtitle">
+        Увійдіть, щоб переглянути свої записи, історію візитів та документи.
+      </p>
+
+      {% if form.errors %}
+        <div class="login-error-global">
+          Невірний логін або пароль. Спробуйте ще раз.
+        </div>
+      {% endif %}
+
+      <form method="post"
+            action="{% url 'login' %}"
+            class="login-form">
+        {% csrf_token %}
+
+        {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+
+        <div class="login-form__group">
+          <label class="login-form__label" for="id_username">Логін</label>
+          <input type="text"
+                 name="username"
+                 id="id_username"
+                 class="login-form__input"
+                 required
+                 autofocus>
+        </div>
+
+        <div class="login-form__group">
+          <label class="login-form__label" for="id_password">Пароль</label>
+          <input type="password"
+                 name="password"
+                 id="id_password"
+                 class="login-form__input"
+                 required>
+        </div>
+
+        <button type="submit" class="login-form__submit">
+          Увійти
+        </button>
+      </form>
+
+      <p class="login-card__hint">
+        Немає акаунта?
+        <a href="{% url 'register' %}">Зареєструватися</a>
+      </p>
+
+      <p class="login-card__hint login-card__hint--small">
+        Адміністратор або лікар? → <a href="/admin/">Вхід до адмін-панелі</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

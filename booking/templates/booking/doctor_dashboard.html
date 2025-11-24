@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Кабінет лікаря{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/doctor.css' %}">
+{% endblock %}
+
+{% block body_class %}page-doctor-dashboard{% endblock %}
+
+{% block content %}
+<section class="dashboard dashboard--doctor">
+  <div class="dashboard__inner">
+
+    <!-- Сайдбар: лікар -->
+    <aside class="dashboard__sidebar">
+      <div class="doctor-card">
+        <h2 class="doctor-card__name">
+          {% if doctor %}
+            {{ doctor.full_name }}
+          {% else %}
+            Адміністратор
+          {% endif %}
+        </h2>
+
+        {% if doctor and doctor.branch %}
+          <div class="doctor-card__line">
+            <span class="doctor-card__label">Філіал:</span>
+            <span class="doctor-card__value">{{ doctor.branch.name }}</span>
+          </div>
+        {% endif %}
+
+        {% if doctor and doctor.specialization %}
+          <div class="doctor-card__line">
+            <span class="doctor-card__label">Спеціалізація:</span>
+            <span class="doctor-card__value">{{ doctor.specialization }}</span>
+          </div>
+        {% endif %}
+
+        {% if doctor and doctor.phone %}
+          <div class="doctor-card__line">
+            <span class="doctor-card__label">Телефон:</span>
+            <span class="doctor-card__value">{{ doctor.phone }}</span>
+          </div>
+        {% endif %}
+
+        <div class="doctor-card__line doctor-card__line--small">
+          <span class="doctor-card__label">Унікальних пацієнтів:</span>
+          <span class="doctor-card__value">{{ stats_overall.patients }}</span>
+        </div>
+      </div>
+
+      <div class="doctor-card doctor-card--secondary">
+        <h3 class="doctor-card__subtitle">Зведена статистика</h3>
+        <ul class="doctor-summary">
+          <li class="doctor-summary__item">
+            <span class="doctor-summary__label">Візитів сьогодні</span>
+            <span class="doctor-summary__value">{{ stats_overall.today }}</span>
+          </li>
+          <li class="doctor-summary__item">
+            <span class="doctor-summary__label">Візитів цього тижня</span>
+            <span class="doctor-summary__value">{{ stats_overall.week }}</span>
+          </li>
+          <li class="doctor-summary__item">
+            <span class="doctor-summary__label">Усього заплановано</span>
+            <span class="doctor-summary__value">{{ stats_overall.total }}</span>
+          </li>
+          <li class="doctor-summary__item">
+            <span class="doctor-summary__label">Завершено</span>
+            <span class="doctor-summary__value">{{ stats_overall.completed }}</span>
+          </li>
+          <li class="doctor-summary__item">
+            <span class="doctor-summary__label">Скасовано / не зʼявився</span>
+            <span class="doctor-summary__value">{{ stats_overall.cancelled }}</span>
+          </li>
+          <li class="doctor-summary__item">
+            <span class="doctor-summary__label">Орієнтовна виручка</span>
+            <span class="doctor-summary__value">
+              {{ stats_overall.spent_total|floatformat:0 }} грн
+            </span>
+            <span class="doctor-summary__hint">
+              За ціною послуг у завершених візитах
+            </span>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Контент: фільтри, графік, таблиця -->
+    <div class="dashboard__content">
+
+      <!-- Панель фільтрів -->
+      <section class="filters-panel">
+        <div class="filters-panel__header">
+          <h2 class="filters-panel__title">Записи пацієнтів</h2>
+          <button type="button" class="filters-panel__toggle" data-filters-toggle>
+            Фільтри
+          </button>
+        </div>
+
+        <form method="get" class="filters-panel__form" data-filters-form>
+          <div class="filters-panel__grid">
+            <div class="filters-panel__field">
+              <label for="f-date-from">Дата з</label>
+              <input type="date" id="f-date-from" name="date_from" value="{{ filters.date_from }}">
+            </div>
+            <div class="filters-panel__field">
+              <label for="f-date-to">Дата по</label>
+              <input type="date" id="f-date-to" name="date_to" value="{{ filters.date_to }}">
+            </div>
+            <div class="filters-panel__field">
+              <label for="f-status">Статус</label>
+              <select id="f-status" name="status">
+                <option value="">Усі</option>
+                {% for key, label in appointments.model.Status.choices %}
+                  <option value="{{ key }}" {% if filters.status == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="filters-panel__field">
+              <label for="f-branch">Філіал</label>
+              <select id="f-branch" name="branch">
+                <option value="">Усі</option>
+                {% for b in branches %}
+                  <option value="{{ b.id }}" {% if filters.branch == b.id|stringformat:'s' %}selected{% endif %}>
+                    {{ b.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            {% if user.is_superuser %}
+              <div class="filters-panel__field">
+                <label for="f-doctor">Лікар</label>
+                <select id="f-doctor" name="doctor">
+                  <option value="">Усі</option>
+                  {% for d in doctors_all %}
+                    <option value="{{ d.id }}" {% if filters.doctor == d.id|stringformat:'s' %}selected{% endif %}>
+                      {{ d.full_name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endif %}
+
+            <div class="filters-panel__field filters-panel__field--wide">
+              <label for="f-patient">Пошук пацієнта</label>
+              <input type="text"
+                     id="f-patient"
+                     name="patient"
+                     value="{{ filters.patient }}"
+                     placeholder="ПІБ або телефон">
+            </div>
+          </div>
+
+          <div class="filters-panel__actions">
+            <button type="submit" class="btn btn--primary">Застосувати</button>
+            <a href="{% url 'doctor_dashboard' %}" class="btn btn--ghost">Скинути</a>
+          </div>
+        </form>
+      </section>
+
+      <!-- Статистика по послугах -->
+      <section class="dashboard-section dashboard-section--chart">
+        <h3 class="dashboard-section__title">Статистика за послугами (по вибірці)</h3>
+        {% if service_stats %}
+          <ul class="service-chart">
+            {% for s in service_stats %}
+              <li class="service-chart__item">
+                <div class="service-chart__label">
+                  <span class="service-chart__name">{{ s.name }}</span>
+                  <span class="service-chart__value">
+                    {{ s.amount|floatformat:0 }} грн · {{ s.count }} візит{% if s.count != 1 %}и{% endif %}
+                  </span>
+                </div>
+                <div class="service-chart__bar-wrap">
+                  <div class="service-chart__bar" style="--bar-width: {{ s.percent }}%;"></div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Немає завершених візитів у поточній вибірці.</p>
+        {% endif %}
+      </section>
+
+      <!-- Таблиця записів -->
+      <section class="dashboard-section">
+        <h3 class="dashboard-section__title">
+          Записи ({{ appointments.count }})
+        </h3>
+
+        <div class="table-wrapper">
+          <table class="table table--appointments">
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Час</th>
+                <th>Пацієнт</th>
+                <th>Телефон</th>
+                <th>Філіал</th>
+                <th>Послуга</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for app in appointments %}
+              <tr class="appt-row"
+                  data-appt-date="{{ app.date|date:'d.m.Y' }}"
+                  data-appt-time="{{ app.time|time:'H:i' }}"
+                  data-appt-patient="{{ app.patient.full_name|default:app.full_name }}"
+                  data-appt-phone="{{ app.patient.phone|default:app.phone }}"
+                  data-appt-branch="{{ app.branch.name }}"
+                  data-appt-doctor="{% if app.doctor %}{{ app.doctor.full_name }}{% else %}-{% endif %}"
+                  data-appt-service="{% if app.service %}{{ app.service.name }}{% else %}-{% endif %}"
+                  data-appt-status="{{ app.get_status_display }}"
+                  data-appt-note="{{ app.note|default:''|escape }}">
+                <td>{{ app.date|date:"d.m.Y" }}</td>
+                <td>{{ app.time|time:"H:i" }}</td>
+                <td>
+                    {% if app.patient %}
+                        <a href="{% url 'doctor_patient_detail' app.patient.id %}" class="appt-patient-link">
+                        {{ app.patient.full_name }}
+                        </a>
+                    {% else %}
+                        {{ app.full_name }}
+                    {% endif %}
+                </td>
+                <td>
+                  {% if app.patient %}
+                    {{ app.patient.phone }}
+                  {% else %}
+                    {{ app.phone }}
+                  {% endif %}
+                </td>
+                <td>{{ app.branch.name }}</td>
+                <td>{% if app.service %}{{ app.service.name }}{% else %}-{% endif %}</td>
+                <td>{{ app.get_status_display }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7">Записів поки немає.</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- Модалка деталей запису -->
+<div class="appt-modal" data-appt-modal>
+  <div class="appt-modal__backdrop" data-appt-close></div>
+  <div class="appt-modal__dialog">
+    <button type="button" class="appt-modal__close" data-appt-close>✕</button>
+    <h3 class="appt-modal__title">Деталі запису</h3>
+    <div class="appt-modal__body">
+      <div class="appt-modal__row">
+        <span class="appt-modal__label">Дата та час:</span>
+        <span class="appt-modal__value" data-appt-details-datetime></span>
+      </div>
+      <div class="appt-modal__row">
+        <span class="appt-modal__label">Пацієнт:</span>
+        <span class="appt-modal__value" data-appt-details-patient></span>
+      </div>
+      <div class="appt-modal__row">
+        <span class="appt-modal__label">Телефон:</span>
+        <span class="appt-modal__value" data-appt-details-phone></span>
+      </div>
+      <div class="appt-modal__row">
+        <span class="appt-modal__label">Філіал:</span>
+        <span class="appt-modal__value" data-appt-details-branch></span>
+      </div>
+      <div class="appt-modal__row">
+        <span class="appt-modal__label">Лікар:</span>
+        <span class="appt-modal__value" data-appt-details-doctor></span>
+      </div>
+      <div class="appt-modal__row">
+        <span class="appt-modal__label">Послуга:</span>
+        <span class="appt-modal__value" data-appt-details-service></span>
+      </div>
+      <div class="appt-modal__row">
+        <span class="appt-modal__label">Статус:</span>
+        <span class="appt-modal__value" data-appt-details-status></span>
+      </div>
+      <div class="appt-modal__row appt-modal__row--note">
+        <span class="appt-modal__label">Коментар пацієнта:</span>
+        <p class="appt-modal__value" data-appt-details-note></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/doctor.js' %}"></script>
+{% endblock %}

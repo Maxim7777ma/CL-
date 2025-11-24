@@ -1,0 +1,183 @@
+/* ====== Шапка сайту ====== */
+body {
+  margin: 0;
+}
+
+.site-footer__inner{
+    display: flex;
+    justify-content: center;
+}
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(248, 250, 252, 0.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.site-header__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.site-header__logo a {
+  font-weight: 800;
+  font-size: 18px;
+  text-decoration: none;
+  color: #0f172a;
+}
+
+.site-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-link {
+  font-size: 14px;
+  text-decoration: none;
+  color: #0f172a;
+  padding: 6px 10px;
+  border-radius: 999px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-link:hover {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+/* ====== Меню користувача з іконкою зуба ====== */
+
+.user-menu {
+  position: relative;
+}
+
+/* Кнопка как у Apple — маленькая, округлая, с тенью */
+.user-menu__toggle {
+  border: none;
+  background: #0f172a;
+  border-radius: 999px;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.user-menu__toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.3);
+}
+
+/* Общий базовый класс для SVG-зубов */
+.user-menu__tooth-icon {
+  display: block;
+}
+
+/* Размер зуба в кнопке — чуть крупнее */
+.user-menu__tooth-icon--button {
+  width: 26px;
+  height: 26px;
+}
+
+/* Размер зуба в пунктах меню — поменьше */
+.user-menu__tooth-icon--item {
+  width: 18px;
+  height: 18px;
+}
+
+/* Панель меню */
+
+.user-menu__panel {
+  position: absolute;
+  right: 0;
+  top: 120%;
+  min-width: 240px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.25);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  padding: 8px 8px;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+/* коли меню відкрито */
+
+.user-menu.is-open .user-menu__panel {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  background: #83ffffde;
+}
+
+/* Пункти меню */
+
+.user-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #0f172a;
+  font-size: 14px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.user-menu__item + .user-menu__item {
+  margin-top: 2px;
+}
+
+.user-menu__item:hover {
+  background: #92ddff9e;
+  color: #0369a1;
+}
+
+.user-menu__item--secondary {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.user-menu__item--secondary:hover {
+  background: #92ddff9e;
+  color: #000000;
+}
+
+.user-menu__item-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.user-menu__item-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.user-menu__item-text {
+  white-space: nowrap;
+}
+
+/* Адаптив */
+
+@media (max-width: 600px) {
+  .site-header__inner {
+    padding-inline: 12px;
+  }
+
+  .site-header__nav {
+    display: none; /* при желании можно скрыть "Головна" на мобилке */
+  }
+}

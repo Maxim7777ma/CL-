@@ -1,0 +1,52 @@
+.register-page {
+  padding: 40px 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.register-card {
+  max-width: 480px;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px 20px 28px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+}
+
+.register-form__group {
+  margin-bottom: 14px;
+}
+
+.register-form__label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.register-form__input {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.register-form__error {
+  min-height: 16px;
+  font-size: 12px;
+  color: #b91c1c;
+  margin-top: 2px;
+}
+
+.register-form__submit {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}

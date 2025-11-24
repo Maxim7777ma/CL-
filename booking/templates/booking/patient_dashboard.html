@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Кабінет пацієнта{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/patient.css' %}">
+{% endblock %}
+
+{% block body_class %}page-patient-dashboard{% endblock %}
+
+{% block content %}
+<section class="dashboard dashboard--patient">
+  <div class="dashboard__inner">
+    <!-- Сайдбар з профілем та документами -->
+    <div class="dashboard__sidebar">
+      <div class="patient-card">
+        <h2 class="patient-card__name">{{ patient.full_name }}</h2>
+        {% if patient.age %}
+          <div class="patient-card__age">Вік: {{ patient.age }} років</div>
+        {% endif %}
+        <div class="patient-card__phone">Телефон: {{ patient.phone }}</div>
+        {% if patient.email %}
+          <div class="patient-card__email">E-mail: {{ patient.email }}</div>
+        {% endif %}
+        {% if patient.branch %}
+          <div class="patient-card__branch">Основний філіал: {{ patient.branch.name }}</div>
+        {% endif %}
+      </div>
+
+      <div class="patient-card patient-card--secondary">
+        <h3>Мої документи</h3>
+        {% if patient_docs %}
+          <ul class="patient-docs-list">
+            {% for doc in patient_docs %}
+              <li class="patient-docs-list__item">
+                <div class="patient-docs-list__main">
+                  <div class="patient-docs-list__title">{{ doc.title }}</div>
+                  <div class="patient-docs-list__meta">
+                    {{ doc.created_at|date:"d.m.Y H:i" }}
+                  </div>
+                </div>
+                <div class="patient-docs-list__actions">
+                  {% if doc.file %}
+                    <button type="button"
+                            class="btn btn--ghost btn--xs"
+                            data-doc-preview
+                            data-doc-url="{{ doc.file.url }}"
+                            data-doc-name="{{ doc.title }}"
+                            data-doc-filename="{{ doc.file.name|default_if_none:'' }}">
+                      Переглянути
+                    </button>
+                    <a href="{{ doc.file.url }}" class="btn btn--link btn--xs" download>
+                      Завантажити
+                    </a>
+                  {% else %}
+                    <span class="patient-docs-list__nofile">Файл ще не завантажено</span>
+                  {% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Документів ще немає.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Основний контент -->
+    <div class="dashboard__content">
+      <!-- Статистика -->
+      <div class="dashboard__stats">
+        <div class="stat-card">
+          <div class="stat-card__label">Усього візитів</div>
+          <div class="stat-card__value">{{ stats.total }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Майбутні записи</div>
+          <div class="stat-card__value">{{ stats.upcoming }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Завершені візити</div>
+          <div class="stat-card__value">{{ stats.completed }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Скасовані / не зʼявився</div>
+          <div class="stat-card__value">{{ stats.cancelled }}</div>
+        </div>
+        <div class="stat-card stat-card--money">
+          <div class="stat-card__label">Орієнтовно витрачено</div>
+          <div class="stat-card__value">
+            {{ stats.total_spent|floatformat:0 }} грн
+          </div>
+          <div class="stat-card__note">
+            Розрахунок за «ціна від» обраних послуг
+          </div>
+        </div>
+      </div>
+
+      <!-- Діаграма по послугах -->
+      <div class="dashboard__section dashboard__section--chart">
+        <h3>Статистика за послугами</h3>
+        {% if service_stats %}
+          <ul class="service-chart">
+            {% for s in service_stats %}
+              <li class="service-chart__item">
+                <div class="service-chart__label">
+                  <span class="service-chart__name">{{ s.name }}</span>
+                  <span class="service-chart__value">
+                    {{ s.amount|floatformat:0 }} грн · {{ s.count }} візит{% if s.count != 1 %}и{% endif %}
+                  </span>
+                </div>
+                <div class="service-chart__bar-wrap">
+                  <div class="service-chart__bar" style="--bar-width: {{ s.percent }}%;"></div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Поки що немає завершених візитів для відображення статистики.</p>
+        {% endif %}
+      </div>
+
+      <!-- Таблиця записів -->
+      <div class="dashboard__section">
+        <h2 class="dashboard__title">Мої записи</h2>
+
+        <table class="table table--appointments">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Час</th>
+              <th>Лікар</th>
+              <th>Філіал</th>
+              <th>Послуга</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for app in appointments %}
+            <tr>
+              <td>{{ app.date|date:"d.m.Y" }}</td>
+              <td>{{ app.time|time:"H:i" }}</td>
+              <td>{% if app.doctor %}{{ app.doctor.full_name }}{% else %}-{% endif %}</td>
+              <td>{{ app.branch.name }}</td>
+              <td>{% if app.service %}{{ app.service.name }}{% else %}-{% endif %}</td>
+              <td>{{ app.get_status_display }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6">Записів поки немає.</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Модалка для перегляду документів -->
+<div class="doc-modal" data-doc-modal>
+  <div class="doc-modal__backdrop" data-doc-close></div>
+  <div class="doc-modal__dialog">
+    <button type="button" class="doc-modal__close" data-doc-close>✕</button>
+    <h3 class="doc-modal__title" data-doc-title>Документ</h3>
+    <div class="doc-modal__body">
+      <img data-doc-image class="doc-modal__image" alt="" style="display:none;">
+      <iframe data-doc-pdf class="doc-modal__pdf" style="display:none;" frameborder="0"></iframe>
+      <p class="doc-modal__fallback" data-doc-fallback style="display:none;">
+        <a href="#" target="_blank" rel="noopener" data-doc-download-link>Відкрити документ у новій вкладці</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/patient.js' %}"></script>
+{% endblock %}

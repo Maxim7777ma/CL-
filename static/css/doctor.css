@@ -1,0 +1,694 @@
+/* ====== Лейаут дашборду лікаря ====== */
+
+.dashboard--doctor .dashboard__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .dashboard--doctor .dashboard__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.dashboard__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dashboard__content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ====== Картка лікаря ====== */
+
+.doctor-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.doctor-card--secondary {
+  background: #f9fafb;
+}
+
+.doctor-card__name {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.doctor-card__subtitle {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.doctor-card__line {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+
+.doctor-card__line--small {
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(148, 163, 184, 0.6);
+}
+
+.doctor-card__label {
+  color: #6b7280;
+}
+
+.doctor-card__value {
+  font-weight: 500;
+  color: #111827;
+}
+
+/* ====== Список короткої статистики ====== */
+
+.doctor-summary {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.doctor-summary__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.doctor-summary__label {
+  color: #6b7280;
+}
+
+.doctor-summary__value {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.doctor-summary__hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* ====== Панель фільтрів ====== */
+
+.filters-panel {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px 16px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.filters-panel__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.filters-panel__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.filters-panel__toggle {
+  border: none;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.filters-panel__form {
+  margin-top: 6px;
+}
+
+.filters-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .filters-panel__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .filters-panel__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.filters-panel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.filters-panel__field--wide {
+  grid-column: 1 / -1;
+}
+
+.filters-panel__field label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.filters-panel__field input,
+.filters-panel__field select {
+  font-size: 13px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+}
+
+.filters-panel__actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+/* Можна буде сховати фільтри по кнопці, але поки залишимо завжди відкритими.
+   Якщо захочеш — в JS є логіка через клас .filters-panel--collapsed */
+
+/* ====== Кнопки ====== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  padding: 7px 12px;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #ffffff;
+}
+
+.btn--ghost {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* ====== Секції контенту ====== */
+
+.dashboard-section {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.dashboard-section__title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* ====== Діаграма по послугах (reuse з patient, але окремо) ====== */
+
+.service-chart {
+  list-style: none;
+  padding: 0;
+  margin: 2px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.service-chart__item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.service-chart__label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.service-chart__name {
+  font-weight: 500;
+}
+
+.service-chart__value {
+  white-space: nowrap;
+}
+
+.service-chart__bar-wrap {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.service-chart__bar {
+  height: 100%;
+  width: var(--bar-width, 0%);
+  max-width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22c55e, #0ea5e9);
+  transition: width 0.35s ease-out;
+}
+
+/* ====== Таблиця ====== */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead tr {
+  background: #f3f4f6;
+}
+
+.table th,
+.table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table th {
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.table--appointments tbody tr:hover {
+  background: #eff6ff;
+  cursor: pointer;
+}
+
+/* ====== Модалка деталей запису ====== */
+
+.appt-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 70;
+}
+
+.appt-modal.is-open {
+  display: flex;
+}
+
+.appt-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.appt-modal__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(90vw, 640px);
+  max-height: 90vh;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.appt-modal__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.appt-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.appt-modal__body {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.appt-modal__row {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.appt-modal__row--note {
+  flex-direction: column;
+}
+
+.appt-modal__label {
+  min-width: 120px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.appt-modal__value {
+  color: #111827;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.appt-patient-link {
+  color: #2563eb;
+  text-decoration: none;
+}
+.appt-patient-link:hover {
+  text-decoration: underline;
+}
+/* ===== Фильтр на сторінці пацієнта (доктор) ===== */
+
+.patient-filter {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.patient-filter__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.patient-filter__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+}
+
+.patient-filter__field label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.patient-filter__field input,
+.patient-filter__field select {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.patient-filter__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn.btn--small {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 999px;
+}
+
+/* ===== Список візитів картками ===== */
+
+.appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.appointment-card {
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 14px 16px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+  border: 1px solid #e5e7eb;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.appointment-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+}
+
+.appointment-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.appointment-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.appointment-card__date-time {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.appointment-card__date {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.appointment-card__time {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.appointment-card__status {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.appointment-card__status--completed {
+  background: #dcfce7;
+  color: #15803d;
+}
+.appointment-card__status--new {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+.appointment-card__status--confirmed {
+  background: #fef3c7;
+  color: #92400e;
+}
+.appointment-card__status--cancelled,
+.appointment-card__status--no_show {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.appointment-card__meta {
+  min-width: 180px;
+  font-size: 13px;
+}
+
+.appointment-card__line {
+  display: flex;
+  gap: 6px;
+}
+
+.appointment-card__label {
+  color: #6b7280;
+}
+
+.appointment-card__value {
+  color: #111827;
+}
+
+/* Тело картки */
+
+.appointment-card__body {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 8px;
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.appointment-card__field label {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.appointment-card__service-select {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+/* Коментар */
+
+.appointment-card__field--comment {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.appointment-card__comment-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.appointment-card__comment-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.appointment-card__comment-toggle {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 12px;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.appointment-card__comment-summary {
+  font-size: 13px;
+  color: #374151;
+  margin-top: 2px;
+}
+
+.appointment-card__comment-empty {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.appointment-card__comment-body {
+  display: none;
+  margin-top: 6px;
+}
+
+.appointment-card--comments-open .appointment-card__comment-body {
+  display: block;
+}
+
+.appointment-card--comments-open .appointment-card__comment-summary {
+  display: none;
+}
+
+.appointment-card__comment-input {
+  width: 100%;
+  min-height: 70px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  padding: 6px 8px;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.appointment-card__comment-actions {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+}
+
+.appointment-card__comment-status {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #16a34a;
+}
+
+/* Пагінація */
+
+.pagination {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.pagination__link {
+  text-decoration: none;
+  color: #2563eb;
+}
+
+.pagination__link:hover {
+  text-decoration: underline;
+}
+
+.pagination__info {
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .appointment-card__header {
+    flex-direction: column;
+  }
+  .appointment-card__body {
+    grid-template-columns: 1fr;
+  }
+  .patient-filter__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
