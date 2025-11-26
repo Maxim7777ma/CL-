@@ -2,17 +2,20 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 
-from .models import Branch, Service, Appointment, Patient, Doctor
+from .models import Branch, Service, Appointment, Patient, Doctor, DoctorSchedule, DoctorDaySchedule,TreatmentCategory
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model, login
 from django.urls import reverse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from django.utils import timezone
 
 from django.db.models import Count, Sum, Q
 from django.core.paginator import Paginator
 from urllib.parse import urlencode
-
+from django.core.paginator import Paginator
+from django.contrib.auth import logout
+from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404
 
 
 def index(request):
@@ -20,13 +23,42 @@ def index(request):
     Лендинг стоматології.
     """
     branches = Branch.objects.filter(is_active=True).order_by("sort_order")
-    services = Service.objects.filter(is_active=True).order_by("name")
+
+    # 🔹 все активные услуги
+    services_qs = Service.objects.filter(is_active=True).order_by("name")
+
+    # 🔹 пагинация по 5 услуг
+    paginator = Paginator(services_qs, 5)
+    page_number = request.GET.get("services_page") or 1
+    services_page = paginator.get_page(page_number)
+
+
+    treatments_qs = (
+        TreatmentCategory.objects
+        .filter(is_active=True)
+        .exclude(slug__isnull=True)
+        .exclude(slug__exact="")
+        .order_by("title")
+    )
+    treatments_paginator = Paginator(treatments_qs, 10)  # до 10 карток на сторінці
+    treatments_page_number = request.GET.get("treatments_page") or 1
+    treatments_page = treatments_paginator.get_page(treatments_page_number)
+
+    # 🔹 врачи для баннера
+    hero_doctors = (
+        Doctor.objects.filter(is_active=True)
+        .select_related("branch")
+        .order_by("full_name")[:4]
+    )
 
     return render(request, "booking/index.html", {
         "branches": branches,
-        "services": services,
-        "page_id": "landing",  # для унікальних класів/стилів
+        "services": services_page,   # 👈 теперь это Page-объект
+        "hero_doctors": hero_doctors,
+        "treatments": treatments_page, 
+        "page_id": "landing",
     })
+
 
 
 @login_required
@@ -559,8 +591,11 @@ from django.db.models import Prefetch
 @require_GET
 def api_day_schedule(request):
     """
-    Повертає список лікарів та зайняті слоти на конкретну дату.
-    Використовується віджетом календаря на лендингу.
+    Повертає список лікарів та зайняті/вільні слоти на конкретну дату
+    з урахуванням:
+    - тижневого графіку DoctorSchedule
+    - денного оверрайду DoctorDaySchedule
+    - вибраної філії (branch)
     """
     date_str = request.GET.get("date")
     branch_id = request.GET.get("branch")
@@ -573,24 +608,95 @@ def api_day_schedule(request):
     except ValueError:
         return JsonResponse({"error": "Некоректний формат дати."}, status=400)
 
-    doctors_qs = Doctor.objects.all().select_related("branch")
+    weekday_index = day.weekday()  # Monday=0
 
+    # Базовый набор докторов
+    doctors_qs = Doctor.objects.filter(is_active=True).select_related("branch")
     if branch_id:
         doctors_qs = doctors_qs.filter(branch_id=branch_id)
 
-    # Базовий робочий день: 9:00–18:00 по годинам
-    start_hour = 9
-    end_hour = 18
-    hours = [f"{h:02d}:00" for h in range(start_hour, end_hour)]
+    # ---- Тижневий графік (шаблон) ----
+    weekly_qs = DoctorSchedule.objects.filter(
+        weekday=weekday_index,
+        is_active=True,
+        doctor__in=doctors_qs,
+    )
+    if branch_id:
+        weekly_qs = weekly_qs.filter(branch_id=branch_id)
 
-    # Тягнемо всі записи для цих лікарів на цю дату
+    weekly_by_doctor = {s.doctor_id: s for s in weekly_qs}
+
+    # ---- Денний override ----
+    day_qs = DoctorDaySchedule.objects.filter(
+        date=day,
+        doctor__in=doctors_qs,
+    )
+    if branch_id:
+        day_qs = day_qs.filter(branch_id=branch_id)
+
+    day_by_doctor = {s.doctor_id: s for s in day_qs}
+
+    # ---- Вираховуємо ефективний графік на цей день ----
+    effective_schedule = {}  # doctor_id -> object з полями start_time, end_time, branch
+    for doctor in doctors_qs:
+        day_sched = day_by_doctor.get(doctor.id)
+        if day_sched:
+            # денний override
+            if not day_sched.is_working:
+                continue  # сьогодні не працює
+            if not day_sched.start_time or not day_sched.end_time:
+                continue  # некоректний запис
+            effective_schedule[doctor.id] = day_sched
+        else:
+            # тижневий графік
+            week_sched = weekly_by_doctor.get(doctor.id)
+            if not week_sched:
+                continue
+            if not week_sched.is_active:
+                continue
+            effective_schedule[doctor.id] = week_sched
+
+    # Якщо в цей день ніхто не працює
+    if not effective_schedule:
+        return JsonResponse({
+            "date": day.isoformat(),
+            "hours": [],
+            "doctors": [],
+        })
+
+    # Обмежуємо список лікарів тільки тими, хто реально працює в цей день
+    working_doctor_ids = list(effective_schedule.keys())
+    doctors_qs = doctors_qs.filter(id__in=working_doctor_ids)
+
+    # ---- Формуємо діапазон годин для сітки ----
+    all_starts = []
+    all_ends = []
+    for sched in effective_schedule.values():
+        all_starts.append(sched.start_time.hour)
+        all_ends.append(sched.end_time.hour)
+
+    start_hour = min(all_starts)
+    end_hour = max(all_ends)
+
+    # наприклад, 9..18 → ["09:00", ..., "17:00"]
+    slot_minutes = 30  # базовый шаг слота
+    start_dt = datetime.combine(day, time(hour=start_hour, minute=0))
+    end_dt = datetime.combine(day, time(hour=end_hour, minute=0))
+
+    hours = []
+    cur = start_dt
+    while cur < end_dt:
+        hours.append(cur.strftime("%H:%M"))
+        cur += timedelta(minutes=slot_minutes)
+
+    # ---- Тягнемо апойтменти для цих лікарів на цю дату ----
     appointments = Appointment.objects.filter(
         date=day,
-        doctor__in=doctors_qs
+        doctor__in=doctors_qs,
+        status__in=[Appointment.Status.NEW, Appointment.Status.CONFIRMED],
     ).select_related("doctor", "service", "patient")
 
-    # Мапа: doctor_id -> { "HH:MM": апойтмент-дані }
-    busy_map = {}
+    busy_map = {}  # doctor_id -> { "HH:MM": {...} }
     for appt in appointments:
         key = appt.time.strftime("%H:%M")
         busy_map.setdefault(appt.doctor_id, {})
@@ -603,13 +709,24 @@ def api_day_schedule(request):
 
     doctors_data = []
     for doctor in doctors_qs:
+        sched = effective_schedule.get(doctor.id)
+        if not sched:
+            continue
+
+        work_start = sched.start_time.strftime("%H:%M")
+        work_end = sched.end_time.strftime("%H:%M")
         doc_busy = busy_map.get(doctor.id, {})
+
         doctors_data.append({
             "id": doctor.id,
             "name": doctor.full_name,
             "branch": doctor.branch.name if getattr(doctor, "branch", None) else "",
             "branch_id": doctor.branch_id,
-            "busy_slots": doc_busy,  # об'єкт { "09:00": {...}, ... }
+            "work_start": work_start,
+            "work_end": work_end,
+            "break_start": sched.break_start.strftime("%H:%M") if getattr(sched, "break_start", None) else None,
+            "break_end": sched.break_end.strftime("%H:%M") if getattr(sched, "break_end", None) else None,
+            "busy_slots": doc_busy,
         })
 
     return JsonResponse({
@@ -746,3 +863,51 @@ def profile_redirect(request):
 
     # запасний варіант — на головну
     return redirect("index")
+
+
+
+def logout_view(request):
+    """
+    Универсальный выход для любого пользователя.
+    Работает по GET и по POST.
+    """
+    logout(request)
+    return redirect("index")  # или куда надо: "patient_dashboard" / "doctor_dashboard"
+
+
+
+
+def treatment_category_detail(request, slug):
+    """
+    Детальна сторінка категорії лікування:
+    - фото (якщо є)
+    - повний текст
+    - 4 ключові пункти
+    - прив'язані послуги
+    - лінки на інші категорії
+    """
+    category = get_object_or_404(
+        TreatmentCategory,
+        slug=slug,
+        is_active=True,
+    )
+
+    # послуги, прив'язані до цієї категорії (через M2M)
+    related_services = category.services.filter(is_active=True).order_by("name") if hasattr(category, "services") else []
+
+    # інші категорії для блоку "Інші напрямки лікування"
+    other_categories = (
+        TreatmentCategory.objects.filter(is_active=True)
+        .exclude(id=category.id)
+        .order_by("title")[:6]
+    )
+
+    return render(
+        request,
+        "booking/treatment_category_detail.html",
+        {
+            "category": category,
+            "related_services": related_services,
+            "other_categories": other_categories,
+        },
+    )

@@ -32,6 +32,17 @@ document.addEventListener("DOMContentLoaded", function () {
   const noteTextarea = document.getElementById("booking-note");
 
   const branchSelect = document.getElementById("booking-branch-select");
+  const branchDropdown = bookingBox.querySelector("[data-branch-dropdown]");
+  const branchToggle = bookingBox.querySelector("[data-branch-toggle]");
+  const branchMenu = bookingBox.querySelector("[data-branch-menu]");
+  const branchCurrentLabel = bookingBox.querySelector("[data-branch-current-label]");
+
+
+  const authModal = bookingBox.querySelector("[data-auth-modal]");
+  const authModalBackdrop = bookingBox.querySelector("[data-auth-modal-backdrop]");
+  const authModalCloseEls = bookingBox.querySelectorAll("[data-auth-modal-close]");
+  const authRegisterBtn = bookingBox.querySelector("[data-auth-register]");
+  const registerUrl = bookingBox.dataset.registerUrl || "/register/";
 
   // ====== Helpers ======
   function getCookie(name) {
@@ -191,11 +202,57 @@ document.addEventListener("DOMContentLoaded", function () {
   })();
 
   // Автооновлення при зміні філії
-  if (branchSelect) {
-    branchSelect.addEventListener("change", function () {
-      loadScheduleForSelected();
+// ==== Дропдаун філій ====
+
+// открыть/закрыть меню по клику на кнопку
+if (branchToggle && branchDropdown) {
+  branchToggle.addEventListener("click", function () {
+    branchDropdown.classList.toggle("is-open");
+  });
+}
+
+// выбор філії в меню
+if (branchMenu && branchSelect) {
+  branchMenu.addEventListener("click", function (e) {
+    const btn = e.target.closest(".booking-branch-option");
+    if (!btn) return;
+
+    const branchId = btn.dataset.branchId || "";
+    const branchName = btn.textContent.trim() || "Усі філії";
+
+    // пишем выбранный id в hidden-инпут
+    branchSelect.value = branchId;
+
+    // меняем текст на основной кнопке
+    if (branchCurrentLabel) {
+      branchCurrentLabel.textContent = branchName;
+    }
+
+    // подсветка активного пункта
+    branchMenu.querySelectorAll(".booking-branch-option").forEach((b) => {
+      b.classList.remove("is-active");
     });
+    btn.classList.add("is-active");
+
+    // закрываем меню
+    if (branchDropdown) {
+      branchDropdown.classList.remove("is-open");
+    }
+
+    // обновляем расписание
+    loadScheduleForSelected();
+  });
+}
+
+// закрытие меню по клику вне
+document.addEventListener("click", function (e) {
+  if (!branchDropdown) return;
+  if (!branchDropdown.contains(e.target)) {
+    branchDropdown.classList.remove("is-open");
   }
+});
+
+
 
   // ====== Завантаження розкладу ======
   function loadScheduleForSelected() {
@@ -223,84 +280,189 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  function renderSchedule(data) {
-    scheduleEl.style.display = "block";
+function renderSchedule(data) {
+  scheduleEl.style.display = "block";
 
-    const hours = data.hours || [];
-    const doctors = data.doctors || [];
+  // slots — массив "09:00", "09:30", ...
+  const slots = data.slots || data.hours || [];
+  const doctors = data.doctors || [];
 
-    // Верхняя строка с врачами
-    doctorsContainer.innerHTML = "";
+  // шапка с врачами
+  doctorsContainer.innerHTML = "";
+  doctors.forEach((doc) => {
+    const div = document.createElement("div");
+    div.className = "schedule-grid__doctors-item";
+    div.textContent = doc.name;
+    div.dataset.doctorId = doc.id;
+    doctorsContainer.appendChild(div);
+  });
+
+  // левая колонка времени
+  timesContainer.innerHTML = "";
+  slots.forEach((time) => {
+    const div = document.createElement("div");
+    div.className = "schedule-grid__time-cell";
+    div.textContent = time;
+    timesContainer.appendChild(div);
+  });
+
+  // подсветка ближайшего свободного слота
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+  const isToday = data.date === todayStr;
+  let nextHighlighted = false;
+
+  // карта: какие слоты нужно пропустить из-за span > 1
+  const skipMap = {};
+  doctors.forEach((doc) => {
+    skipMap[doc.id] = {};
+  });
+
+  cellsContainer.innerHTML = "";
+
+  slots.forEach((time, slotIndex) => {
+    const row = document.createElement("div");
+    row.className = "schedule-grid__row";
+
     doctors.forEach((doc) => {
-      const div = document.createElement("div");
-      div.className = "schedule-grid__doctors-item";
-      div.textContent = doc.name;
-      div.dataset.doctorId = doc.id;
-      doctorsContainer.appendChild(div);
-    });
+      skipMap[doc.id] = skipMap[doc.id] || {};
 
-    // Левая колонка времени
-    timesContainer.innerHTML = "";
-    hours.forEach((h) => {
-      const div = document.createElement("div");
-      div.className = "schedule-grid__time-cell";
-      div.textContent = h;
-      timesContainer.appendChild(div);
-    });
+      // если этот 30-минутный отрезок уже покрыт предыдущим длинным занятым слотом
+      if (skipMap[doc.id][time]) {
+        const dummy = document.createElement("div");
+        dummy.className = "schedule-slot schedule-slot--hidden";
+        row.appendChild(dummy);
+        return;
+      }
 
-    // Сетка ячеек
-    cellsContainer.innerHTML = "";
-    hours.forEach((h) => {
-      const row = document.createElement("div");
-      row.className = "schedule-grid__row";
+      const cell = document.createElement("div");
+      cell.className = "schedule-slot";
 
-      doctors.forEach((doc) => {
-        const cell = document.createElement("div");
-        cell.className = "schedule-slot";
+      const workStart = doc.work_start || null;  // "09:00"
+      const workEnd = doc.work_end || null;      // "18:00"
 
-        const busyInfo = (doc.busy_slots || {})[h + ":00".slice(2)]; // если у тебя формат "09:00" совпадает, можно doc.busy_slots[h]
+      const isWorkingHere =
+        (!workStart || time >= workStart) &&
+        (!workEnd || time < workEnd);
 
-        // наш data.busy_slots ключи: "HH:MM"
-        const busy = (doc.busy_slots || {})[h];
+      const breakStart = doc.break_start || null;
+      const breakEnd = doc.break_end || null;
+      const isBreak =
+        breakStart && breakEnd && time >= breakStart && time < breakEnd;
 
-        if (busy) {
-          const label = document.createElement("div");
-          label.className = "schedule-slot__label-busy";
-          label.textContent = busy.service || "Зайнято";
-          cell.appendChild(label);
-        } else {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "schedule-slot__btn";
-          btn.textContent = "Вільно";
+      // врач не работает в это время
+      if (!isWorkingHere) {
+        cell.classList.add("schedule-slot--off");
+        row.appendChild(cell);
+        return;
+      }
 
-          btn.addEventListener("click", () => {
-            if (!isAuth) {
-              alert("Щоб записатися онлайн, увійдіть або зареєструйтесь.");
-              return;
-            }
-            const selectedBranchId = branchSelect && branchSelect.value ? branchSelect.value : "";
-            openBookingModal({
-              date: data.date,
-              time: h,
-              // якщо філію не вибрали — беремо ту, де працює лікар
-              branchId: selectedBranchId || doc.branch_id || "",
-              branchName: doc.branch || "",
-              doctorId: doc.id,
-              doctorName: doc.name,
-            });
-          });
+      // перерыв / обед
+      if (isBreak) {
+        cell.classList.add("schedule-slot--break");
+        const label = document.createElement("div");
+        label.className = "schedule-slot__label-break";
+        label.textContent = "Перерва";
+        cell.appendChild(label);
+        row.appendChild(cell);
+        return;
+      }
 
-          cell.appendChild(btn);
+      const busy = (doc.busy_slots || {})[time];
 
+      if (busy) {
+        // сколько 30-минутных слотов занимает приём
+        const span = busy.span && busy.span > 1 ? busy.span : 1;
+
+        const label = document.createElement("div");
+        label.className = "schedule-slot__label-busy";
+        label.textContent = busy.service || "Зайнято";
+        cell.appendChild(label);
+
+        if (span > 1) {
+          // растягиваем ячейку по вертикали
+          cell.style.gridRow = "span " + span;
+
+          // помечаем следующие слоты как покрытые этим приёмом
+          for (let i = 1; i < span && slotIndex + i < slots.length; i++) {
+            const nextTime = slots[slotIndex + i];
+            skipMap[doc.id][nextTime] = true;
+          }
         }
 
         row.appendChild(cell);
-      });
+      } else {
+        // свободный слот
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "schedule-slot__btn";
+        btn.textContent = "Вільно";
 
-      cellsContainer.appendChild(row);
+        // подсветка ближайшего свободного слота (одного)
+        if (isToday && !nextHighlighted) {
+          const [h, m] = time.split(":").map(Number);
+          const slotDate = new Date();
+          slotDate.setHours(h, m, 0, 0);
+
+          if (slotDate >= now) {
+            btn.classList.add("schedule-slot__btn--next");
+            nextHighlighted = true;
+          }
+        }
+
+        btn.addEventListener("click", () => {
+          if (!isAuth) {
+            openAuthModal();
+            return;
+          }
+          const selectedBranchId =
+            branchSelect && branchSelect.value ? branchSelect.value : "";
+          openBookingModal({
+            date: data.date,
+            time: time,
+            branchId: selectedBranchId || doc.branch_id || "",
+            branchName: doc.branch || "",
+            doctorId: doc.id,
+            doctorName: doc.name,
+          });
+        });
+
+        cell.appendChild(btn);
+        row.appendChild(cell);
+      }
+    });
+
+    cellsContainer.appendChild(row);
+  });
+}
+
+  // ====== Міні-модалка "увійдіть / зареєструйтесь" ======
+  function openAuthModal() {
+    if (!authModal) return;
+    authModal.style.display = "flex";
+  }
+
+  function closeAuthModal() {
+    if (!authModal) return;
+    authModal.style.display = "none";
+  }
+
+  if (authModalBackdrop) {
+    authModalBackdrop.addEventListener("click", closeAuthModal);
+  }
+
+  if (authModalCloseEls) {
+    authModalCloseEls.forEach((el) => {
+      el.addEventListener("click", closeAuthModal);
     });
   }
+
+  if (authRegisterBtn) {
+    authRegisterBtn.addEventListener("click", function () {
+      window.location.href = registerUrl;
+    });
+  }
+
 
   // ====== Модалка ======
 
@@ -381,4 +543,62 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
   }
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  const doctorCards = document.querySelectorAll("[data-doctor-card]");
+  if (!doctorCards.length) return;
+
+  doctorCards.forEach((card) => {
+    const toggles = card.querySelectorAll("[data-doctor-toggle]");
+    toggles.forEach((btn) => {
+      btn.addEventListener("click", function () {
+        card.classList.toggle("is-flipped");
+      });
+    });
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const servicesBlock = document.getElementById("services-block");
+  if (!servicesBlock) return;
+
+  // Слушаем клики ТОЛЬКО внутри блока с услугами
+  servicesBlock.addEventListener("click", function (e) {
+    const link = e.target.closest("[data-services-page]");
+    if (!link) return;  // клик не по кнопке пагинации
+
+    e.preventDefault();
+
+    const href = link.getAttribute("href");
+    if (!href) return;
+
+    // Собираем абсолютный URL для fetch
+    const url = new URL(href, window.location.origin);
+
+    fetch(url.toString(), {
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"  // просто маркер, на бэке не обязателен
+      }
+    })
+      .then((r) => r.text())
+      .then((html) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+
+        // Берём такой же блок с новой страницы
+        const newBlock = doc.getElementById("services-block");
+        if (!newBlock) return;
+
+        // Заменяем только контент блока, без перезагрузки страницы
+        servicesBlock.innerHTML = newBlock.innerHTML;
+
+        // Опционально — прокрутить к началу блока плавно
+        servicesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
+      })
+      .catch((err) => {
+        console.error("Помилка завантаження послуг:", err);
+      });
+  });
 });

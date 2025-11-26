@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static l10n %}
 
 {% block title %}Стоматологія — онлайн-запис{% endblock %}
 
@@ -11,9 +11,91 @@
 
 {% block content %}
 
-  <div class="landing-banner">
-    <img src="{% static 'img/baner_stormmm.webp' %}" alt="Стоматологічна клініка" class="landing-banner__img">
+<section class="landing-doctors">
+  <div class="landing-doctors__inner">
+    {% for doctor in hero_doctors %}
+      <article class="doctor-card" data-doctor-card>
+        <div class="doctor-card__inner">
+
+          <!-- лицeвая сторона -->
+          <div class="doctor-card__face doctor-card__face--front">
+            <div class="doctor-card__photo">
+              {% if doctor.photo %}
+                <img src="{{ doctor.photo.url }}"
+                     alt="{{ doctor.full_name }}"
+                     loading="lazy">
+              {% else %}
+                <div class="doctor-card__photo--placeholder">
+                  <span>Фото скоро буде</span>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="doctor-card__content">
+              <div class="doctor-card__tag">
+                {{ doctor.branch.name|default:"Стоматологічна клініка" }}
+              </div>
+              <h2 class="doctor-card__name">{{ doctor.full_name }}</h2>
+              {% if doctor.short_title %}
+                <div class="doctor-card__role">{{ doctor.short_title }}</div>
+              {% elif doctor.specialization %}
+                <div class="doctor-card__role">{{ doctor.specialization }}</div>
+              {% endif %}
+            </div>
+
+            <button type="button"
+                    class="doctor-card__toggle"
+                    data-doctor-toggle>
+              <span class="doctor-card__toggle-label">Про лікаря</span>
+              <span class="doctor-card__toggle-arrow">➜</span>
+            </button>
+          </div>
+
+          <!-- обратная сторона -->
+          <div class="doctor-card__face doctor-card__face--back">
+            <div class="doctor-card__back-content">
+              <h3 class="doctor-card__back-title">{{ doctor.full_name }}</h3>
+
+              <ul class="doctor-card__meta">
+                {% if doctor.age %}
+                  <li><span>Вік:</span> {{ doctor.age }} років</li>
+                {% endif %}
+                {% if doctor.experience_years %}
+                  <li><span>Стаж:</span> {{ doctor.experience_years }} років</li>
+                {% endif %}
+                {% if doctor.specialization %}
+                  <li><span>Спеціалізація:</span> {{ doctor.specialization }}</li>
+                {% endif %}
+              </ul>
+
+              {% if doctor.skills %}
+                <div class="doctor-card__skills">
+                  <span>Навички:</span>
+                  <span class="doctor-card__skills-text">{{ doctor.skills }}</span>
+                </div>
+              {% endif %}
+
+              {% if doctor.bio %}
+                <p class="doctor-card__bio">
+                  {{ doctor.bio }}
+                </p>
+              {% endif %}
+            </div>
+
+            <button type="button"
+                    class="doctor-card__toggle doctor-card__toggle--back"
+                    data-doctor-toggle>
+              <span class="doctor-card__toggle-label">Назад</span>
+              <span class="doctor-card__toggle-arrow doctor-card__toggle-arrow--back">➜</span>
+            </button>
+          </div>
+
+        </div>
+      </article>
+    {% endfor %}
   </div>
+</section>
+
 
 <section class="landing-hero">
   <div class="landing-hero__inner">
@@ -37,7 +119,9 @@
               <div class="branch-card__city">{{ branch.city }}</div>
               <div class="branch-card__address">{{ branch.address }}</div>
               {% if branch.phone_main %}
-                <div class="branch-card__phone">Тел: {{ branch.phone_main }}</div>
+                <a class="branch-card__phone" href="tel:{{ branch.phone_main }}">
+                  Тел: {{ branch.phone_main }}
+                </a>
               {% endif %}
             </div>
           </li>
@@ -50,32 +134,82 @@
 <section id="online-booking" class="landing-booking">
   <div class="landing-booking__inner">
     <div class="landing-booking__left">
-      <h2>Популярні послуги</h2>
-      <ul class="services-list">
-        {% for service in services %}
-          <li class="services-list__item">
-            <div class="service-card">
-              <div class="service-card__name">{{ service.name }}</div>
-              {% if service.price_from %}
-                <div class="service-card__price">від {{ service.price_from }} грн</div>
-              {% endif %}
-              {% if service.description %}
-                <div class="service-card__desc">{{ service.description|truncatewords:20 }}</div>
-              {% endif %}
-            </div>
-          </li>
-        {% empty %}
-          <li>Послуги ще не додані.</li>
-        {% endfor %}
-      </ul>
+
+      <div class="landing-booking__left-header">
+        <h2>Популярні послуги</h2>
+
+        {% if services.paginator.num_pages > 1 %}
+          <div class="services-pagination__info">
+            Сторінка {{ services.number }} з {{ services.paginator.num_pages }}
+          </div>
+        {% endif %}
+      </div>
+
+      {# 🔹 ОБЕРТКА ДЛЯ АЯКС-ОБНОВЛЕНИЯ #}
+      <div id="services-block">
+        <ul class="services-list" data-services-list>
+          {% for service in services %}
+            <li class="services-list__item">
+              <div class="service-card">
+                <div class="service-card__name">{{ service.name }}</div>
+                {% if service.price_from %}
+                  <div class="service-card__price">від {{ service.price_from }} грн</div>
+                {% endif %}
+                {% if service.description %}
+                  <div class="service-card__desc">{{ service.description|truncatewords:20 }}</div>
+                {% endif %}
+              </div>
+            </li>
+          {% empty %}
+            <li>Послуги ще не додані.</li>
+          {% endfor %}
+        </ul>
+
+        {% if services.paginator.num_pages > 1 %}
+          <div class="services-pagination" data-services-pagination>
+
+            {# Кнопка "назад" #}
+            {% if services.has_previous %}
+              <a href="?services_page={{ services.previous_page_number }}#online-booking"
+                 class="services-pagination__btn"
+                 data-services-page="{{ services.previous_page_number }}">
+                ‹ Попередні
+              </a>
+            {% else %}
+              <span class="services-pagination__btn services-pagination__btn--disabled">
+                ‹ Попередні
+              </span>
+            {% endif %}
+
+            <span class="services-pagination__pages">
+              Сторінка {{ services.number }} з {{ services.paginator.num_pages }}
+            </span>
+
+            {# Кнопка "вперед" #}
+            {% if services.has_next %}
+              <a href="?services_page={{ services.next_page_number }}#online-booking"
+                 class="services-pagination__btn"
+                 data-services-page="{{ services.next_page_number }}">
+                Наступні ›
+              </a>
+            {% else %}
+              <span class="services-pagination__btn services-pagination__btn--disabled">
+                Наступні ›
+              </span>
+            {% endif %}
+
+          </div>
+        {% endif %}
+      </div>  {# /services-block #}
     </div>
 
     <div class="landing-booking__right">
       <div class="booking-box"
-           id="booking-box"
-           data-api-day-schedule-url="{% url 'api_day_schedule' %}"
-           data-api-create-appointment-url="{% url 'api_create_appointment' %}"
-           data-is-authenticated="{{ request.user.is_authenticated|yesno:'1,0' }}">
+            id="booking-box"
+            data-api-day-schedule-url="{% url 'api_day_schedule' %}"
+            data-api-create-appointment-url="{% url 'api_create_appointment' %}"
+            data-is-authenticated="{{ request.user.is_authenticated|yesno:'1,0' }}"
+            data-register-url="{% url 'register' %}">
         <div class="booking-box__header">
           <h2 class="booking-box__title">Онлайн-запис</h2>
           <button type="button" class="booking-box__toggle" data-booking-toggle>
@@ -92,14 +226,37 @@
 
         <!-- Фільтри та дата -->
         <div class="booking-filters">
-          <div class="booking-filters__field">
-            <label for="booking-branch-select">Філія</label>
-            <select id="booking-branch-select" class="booking-select">
-              <option value="">Усі філії</option>
-              {% for branch in branches %}
-                <option value="{{ branch.id }}">{{ branch.name }}</option>
-              {% endfor %}
-            </select>
+          <div class="booking-filters__field booking-filters__field--branch">
+            <label>Філія</label>
+
+            <div class="booking-branch-dropdown" data-branch-dropdown>
+              <!-- основная кнопка -->
+              <button type="button"
+                      class="booking-branch-toggle"
+                      data-branch-toggle>
+                <span data-branch-current-label>Усі філії</span>
+                <span class="booking-branch-toggle__chevron">▾</span>
+              </button>
+
+              <!-- выпадающее меню -->
+              <div class="booking-branch-menu" data-branch-menu>
+                <button type="button"
+                        class="booking-branch-option is-active"
+                        data-branch-id="">
+                  Усі філії
+                </button>
+                {% for branch in branches %}
+                  <button type="button"
+                          class="booking-branch-option"
+                          data-branch-id="{{ branch.id }}">
+                    {{ branch.name }}
+                  </button>
+                {% endfor %}
+              </div>
+            </div>
+
+            {# скрытый инпут, чтобы JS дальше работал через branchSelect.value #}
+            <input type="hidden" id="booking-branch-select" value="">
           </div>
 
           <div class="booking-filters__field">
@@ -146,6 +303,8 @@
           </div>
         </div>
 
+        
+
         <!-- Модалка запису -->
         <div class="booking-modal" data-booking-modal>
           <div class="booking-modal__backdrop" data-booking-modal-close></div>
@@ -190,6 +349,25 @@
             </form>
           </div>
         </div>
+        <div class="booking-auth-modal" data-auth-modal>
+          <div class="booking-auth-modal__backdrop" data-auth-modal-backdrop></div>
+          <div class="booking-auth-modal__dialog">
+            <button type="button"
+                    class="booking-auth-modal__close"
+                    data-auth-modal-close>✕</button>
+            <div class="booking-auth-modal__content">
+              <p class="booking-auth-modal__text">
+                Щоб записатися онлайн, увійдіть або зареєструйтесь.
+              </p>
+              <button type="button"
+                      class="booking-auth-modal__btn"
+                      data-auth-register>
+                Зареєструватися
+              </button>
+            </div>
+          </div>
+        </div>
+
 
         {% if not request.user.is_authenticated %}
           <p class="booking-box__auth-hint">
@@ -202,8 +380,249 @@
 
   </div>
 </section>
+
+
+
+<section class="landing-treatments">
+  <div class="landing-treatments__inner">
+    <div class="landing-treatments__header">
+      <h2 class="landing-treatments__title">Напрями лікування</h2>
+      <p class="landing-treatments__subtitle">
+        Обирайте категорію, переглядайте етапи лікування та рекомендовані послуги.
+      </p>
+    </div>
+
+    <div id="landing-treatments-block" data-treatments-list>
+      {% if treatments %}
+        <div class="treatment-grid-wrapper">
+          <div class="treatment-grid">
+            {% for cat in treatments %}
+              <article class="treatment-card">
+                <div class="treatment-card__image">
+                  {% if cat.image %}
+                    <img src="{{ cat.image.url }}"
+                         alt="{{ cat.title }}"
+                         loading="lazy">
+                  {% else %}
+                    <div class="treatment-card__image--placeholder">
+                      <span>Зображення готується</span>
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="treatment-card__body">
+                  <h3 class="treatment-card__title">{{ cat.title }}</h3>
+                  <p class="treatment-card__excerpt">
+                    {{ cat.short_description|truncatewords:20 }}
+                  </p>
+                  {% if cat.slug %}
+                    <a href="{% url 'treatment_category_detail' cat.slug %}"
+                      class="treatment-card__btn">
+                        Ознайомитися
+                    </a>
+                  {% else %}
+                    <button class="treatment-card__btn treatment-card__btn--disabled" disabled>
+                        Скоро
+                    </button>
+                  {% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        </div>
+
+        {% if treatments.paginator.num_pages > 1 %}
+          <div class="treatment-pagination" data-treatments-pagination>
+            {% if treatments.has_previous %}
+              <a href="?treatments_page={{ treatments.previous_page_number }}#landing-treatments"
+                 class="treatment-pagination__btn"
+                 data-treatments-page="{{ treatments.previous_page_number }}">
+                ‹ Попередні
+              </a>
+            {% else %}
+              <span class="treatment-pagination__btn treatment-pagination__btn--disabled">
+                ‹ Попередні
+              </span>
+            {% endif %}
+
+            <span class="treatment-pagination__info">
+              Сторінка {{ treatments.number }} з {{ treatments.paginator.num_pages }}
+            </span>
+
+            {% if treatments.has_next %}
+              <a href="?treatments_page={{ treatments.next_page_number }}#landing-treatments"
+                 class="treatment-pagination__btn"
+                 data-treatments-page="{{ treatments.next_page_number }}">
+                Наступні ›
+              </a>
+            {% else %}
+              <span class="treatment-pagination__btn treatment-pagination__btn--disabled">
+                Наступні ›
+              </span>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% else %}
+        <p>Категорії лікування ще не додані.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section id="contacts" class="landing-contacts">
+  <div class="landing-contacts__inner">
+
+    <div class="landing-contacts__header">
+      <h2 class="landing-contacts__title">Контакти та філії</h2>
+      <p class="landing-contacts__subtitle">
+        Обери філію, щоб побачити адресу, телефони, соцмережі та розташування на карті.
+      </p>
+    </div>
+
+    <!-- ВЕРХНЯ ЛІНІЯ ТАБІВ ФІЛІЙ -->
+    <div class="contacts-branches__tabs">
+      {% for branch in branches %}
+        <button
+          type="button"
+          class="contacts-branch-tab{% if forloop.first %} is-active{% endif %}"
+          data-branch-id="{{ branch.id }}"
+          data-branch-name="{{ branch.name }}"
+          data-branch-city="{{ branch.city }}"
+          data-branch-address="{{ branch.address }}"
+          data-branch-phone-main="{{ branch.phone_main }}"
+          data-branch-phone-additional="{{ branch.phone_additional }}"
+          data-branch-lat="{{ branch.latitude|unlocalize }}"
+          data-branch-lng="{{ branch.longitude|unlocalize }}"
+          data-branch-map-link="{{ branch.map_link }}"
+        >
+          {{ branch.name }}
+        </button>
+      {% endfor %}
+    </div>
+
+    <!-- ДВЕ КОЛОНКИ: ФІЛІЯ + КАРТА -->
+    <div class="contacts-layout">
+
+      <!-- ЛЕВАЯ ЧАСТЬ: ФІЛІЯ + СОЦСЕТИ -->
+      <div class="contacts-layout__left">
+        <div class="contacts-branch-card">
+          <div class="contacts-branch-card__title" id="contacts-branch-name"></div>
+          <div class="contacts-branch-card__row">
+            <span class="contacts-branch-card__label">Місто:</span>
+            <span class="contacts-branch-card__value" id="contacts-branch-city"></span>
+          </div>
+          <div class="contacts-branch-card__row">
+            <span class="contacts-branch-card__label">Адреса:</span>
+            <span class="contacts-branch-card__value" id="contacts-branch-address"></span>
+          </div>
+          <div class="contacts-branch-card__row">
+            <span class="contacts-branch-card__label">Телефон:</span>
+            <span class="contacts-branch-card__value">
+              <a href="#" id="contacts-branch-phone-main"></a>
+              <span id="contacts-branch-phone-additional-wrapper" style="display:none;">
+                &nbsp;•&nbsp;<a href="#" id="contacts-branch-phone-additional"></a>
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <!-- СЕТКА СОЦСЕТЕЙ 2×2 -->
+        <div class="contacts-social-grid">
+          <a href="https://instagram.com/your_clinic"
+             target="_blank"
+             rel="noopener"
+             class="contacts-social-tile contacts-social-tile--ig">
+            <span class="contacts-social-tile__icon">IG</span>
+            <span class="contacts-social-tile__label">@your_clinic</span>
+          </a>
+
+          <a href="https://facebook.com/your_clinic"
+             target="_blank"
+             rel="noopener"
+             class="contacts-social-tile contacts-social-tile--fb">
+            <span class="contacts-social-tile__icon">f</span>
+            <span class="contacts-social-tile__label">Facebook</span>
+          </a>
+
+          <a href="https://youtube.com/@your_clinic"
+             target="_blank"
+             rel="noopener"
+             class="contacts-social-tile contacts-social-tile--yt">
+            <span class="contacts-social-tile__icon">▶</span>
+            <span class="contacts-social-tile__label">YouTube</span>
+          </a>
+
+          <a href="https://tiktok.com/@your_clinic"
+             target="_blank"
+             rel="noopener"
+             class="contacts-social-tile contacts-social-tile--tt">
+            <span class="contacts-social-tile__icon">TT</span>
+            <span class="contacts-social-tile__label">TikTok</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- ПРАВАЯ ЧАСТЬ: КАРТА -->
+      <div class="contacts-layout__right">
+        <div class="contacts-map-card">
+          <div class="contacts-map-card__glow"></div>
+          <iframe
+            id="contacts-map-frame"
+            class="contacts-map-card__frame"
+            src=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <a href="#" target="_blank" rel="noopener" class="contacts-map-card__link" id="contacts-map-link">
+          Відкрити в Google Maps
+        </a>
+      </div>
+
+    </div>
+
+    <!-- НИЖНЯЯ ЛІНІЯ: ГРАФІК РОБОТИ ПІЛЮЛЯМИ -->
+    <div class="contacts-schedule-pills">
+      <div class="contacts-schedule-pill">
+        <span class="contacts-schedule-pill__day">Понеділок</span>
+        <span class="contacts-schedule-pill__time">09:00 – 18:00</span>
+      </div>
+      <div class="contacts-schedule-pill">
+        <span class="contacts-schedule-pill__day">Вівторок</span>
+        <span class="contacts-schedule-pill__time">09:00 – 18:00</span>
+      </div>
+      <div class="contacts-schedule-pill">
+        <span class="contacts-schedule-pill__day">Середа</span>
+        <span class="contacts-schedule-pill__time">09:00 – 18:00</span>
+      </div>
+      <div class="contacts-schedule-pill">
+        <span class="contacts-schedule-pill__day">Четвер</span>
+        <span class="contacts-schedule-pill__time">09:00 – 18:00</span>
+      </div>
+      <div class="contacts-schedule-pill">
+        <span class="contacts-schedule-pill__day">Пʼятниця</span>
+        <span class="contacts-schedule-pill__time">09:00 – 18:00</span>
+      </div>
+      <div class="contacts-schedule-pill">
+        <span class="contacts-schedule-pill__day">Субота</span>
+        <span class="contacts-schedule-pill__time">09:00 – 18:00</span>
+      </div>
+      <div class="contacts-schedule-pill contacts-schedule-pill--closed">
+        <span class="contacts-schedule-pill__day">Неділя</span>
+        <span class="contacts-schedule-pill__time">вихідний</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+
+
 {% endblock %}
 
 {% block extra_js %}
   <script src="{% static 'js/landing.js' %}"></script>
+  <script src="{% static 'js/treatments.js' %}"></script> 
+  <script src="{% static 'js/contacts.js' %}"></script>
 {% endblock %}

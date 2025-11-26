@@ -62,14 +62,14 @@ body {
 /* Кнопка как у Apple — маленькая, округлая, с тенью */
 .user-menu__toggle {
   border: none;
-  background: #0f172a;
+  background: #83cbff;
   border-radius: 999px;
   padding: 4px 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);
+  box-shadow: 0px 0px 3px 1px rgb(21 30 53 / 65%);
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 

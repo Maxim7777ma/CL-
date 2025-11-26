@@ -1,32 +1,4 @@
-/* ====== Общие стили для лендинга ====== */
-
-/* ====== Банер зверху лендингу ====== */
-
-.landing-banner {
-  width: 100%;
-  overflow: hidden;
-}
-
-/* если нужно именно ширина экрана — используем 100vw
-   и "ломаем" ограничения контейнеров */
-.page-landing .landing-banner {
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-}
-
-.landing-banner__img {
-  display: block;
-  width: 100%;
-  height: auto;        /* авто-высота, чтобы не ломать пропорции */
-  object-fit: cover;   /* аккуратное обрезание по краям, если надо */
-  max-height: 480px;   /* можно подправить под твой баннер */
-}
-
-
+/* ====== БАЗА ДЛЯ ЛЕНДИНГА ====== */
 
 .page-landing {
   background: #f3f7fb;
@@ -34,7 +6,7 @@
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* Базовые кнопки (только для лендинга) */
+/* Кнопки */
 
 .btn {
   display: inline-flex;
@@ -73,6 +45,235 @@
   border-color: #7dd3fc;
 }
 
+/* ====== БЛОК С ВРАЧАМИ (СЛАЙДЕР) ====== */
+
+.landing-doctors {
+  width: 100%;
+  background: linear-gradient(135deg, #eff6ff, #e0f2fe);
+  padding: 24px 0 12px;
+}
+
+.landing-doctors__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+/* горизонтальный скролл на мобиле */
+.landing-doctors__inner::-webkit-scrollbar {
+  height: 6px;
+}
+.landing-doctors__inner::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.6);
+}
+
+/* Карточка врача */
+
+.doctor-card {
+  flex: 0 0 260px;
+  perspective: 1200px;
+}
+
+.doctor-card__inner {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  border-radius: 24px;
+  background: radial-gradient(circle at top left, #e0f2fe, #f9fafb);
+  box-shadow: -5px -3px 1px rgba(15, 23, 42, 0.16);
+  transform-style: preserve-3d;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* состояние переворота */
+.doctor-card.is-flipped .doctor-card__inner {
+  transform: rotateY(180deg);
+  box-shadow: 5px -3px 1px rgb(0 76 255 / 24%);
+}
+
+.doctor-card__face {
+  position: absolute;
+  inset: 0;
+  padding: 14px 14px 12px;
+  border-radius: 24px;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* фронт */
+
+.doctor-card__face--front {
+  background: linear-gradient(145deg, #ffffff, #e0f2fe);
+}
+
+.doctor-card__photo {
+  border-radius: 18px;
+  overflow: hidden;
+  height: 140px;
+  margin-bottom: 12px;
+  background: #cbd5f5;
+}
+
+.doctor-card__photo img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.doctor-card__photo--placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #64748b;
+  background: repeating-linear-gradient(
+    45deg,
+    #e0f2fe,
+    #e0f2fe 6px,
+    #bfdbfe 6px,
+    #bfdbfe 12px
+  );
+}
+
+.doctor-card__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.doctor-card__tag {
+  align-self: flex-start;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.12);
+  color: #0284c7;
+}
+
+.doctor-card__name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.doctor-card__role {
+  font-size: 13px;
+  color: #334155;
+}
+
+/* кнопка-стрелка снизу справа */
+
+.doctor-card__toggle {
+  margin-top: auto;
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  background: #0f172a;
+  color: #f9fafb;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.4);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.doctor-card__toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.5);
+  background: #020617;
+  color: #ffffff;
+}
+
+.doctor-card__toggle-label {
+  font-weight: 500;
+}
+
+.doctor-card__toggle-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(0);
+  transition: transform 0.18s ease;
+}
+
+.doctor-card__toggle:hover .doctor-card__toggle-arrow {
+  transform: translateX(2px);
+}
+
+/* обратная сторона */
+
+.doctor-card__face--back {
+  background: linear-gradient(145deg, #0f172a, #1e293b);
+  color: #e5e7eb;
+  transform: rotateY(180deg);
+}
+
+.doctor-card__back-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.doctor-card__back-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.doctor-card__meta {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.doctor-card__meta li span:first-child {
+  color: #9ca3af;
+  margin-right: 4px;
+}
+
+.doctor-card__skills {
+  font-size: 12px;
+}
+
+.doctor-card__skills > span:first-child {
+  color: #93c5fd;
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.doctor-card__bio {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #e5e7eb;
+}
+
+.doctor-card__toggle--back {
+  justify-content: flex-start;
+  background: #e0f2fe;
+  color: #0f172a;
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.6);
+}
+
+.doctor-card__toggle--back .doctor-card__toggle-arrow--back {
+  transform: scaleX(-1);
+}
+
 /* ====== HERO-БЛОК ====== */
 
 .landing-hero {
@@ -87,8 +288,6 @@
   gap: 32px;
   align-items: center;
 }
-
-/* Левая часть с текстом */
 
 .landing-hero__text {
   padding: 20px 8px;
@@ -116,7 +315,7 @@
   gap: 12px;
 }
 
-/* Правая колонка — карточка филиалов */
+/* Правая колонка — филиалы */
 
 .landing-hero__info {
   background: radial-gradient(circle at top left, #e0f2fe 0, #f8fafc 55%);
@@ -177,9 +376,10 @@
   font-size: 13px;
   color: #0ea5e9;
   margin-top: 4px;
+  text-decoration: none;
 }
 
-/* ====== БЛОК ОНЛАЙН-ЗАПИСУ ====== */
+/* ====== БЛОК ОНЛАЙН-ЗАПИСУ (СЕКЦИЯ) ====== */
 
 .landing-booking {
   padding: 16px 16px 40px;
@@ -195,11 +395,16 @@
 
 /* Левая колонка – услуги */
 
-.landing-booking__left > h2 {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 14px;
-  color: #0f172a;
+.landing-booking__left-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.landing-booking__left-header h2 {
+  margin: 0;
 }
 
 .services-list {
@@ -246,46 +451,56 @@
   color: #6b7280;
 }
 
-/* Правая колонка – коробка записи (будущий календарь) */
+/* Пагинация услуг */
+
+.services-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.services-pagination__btn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #d0dde8;
+  color: #44bbeb;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.services-pagination__btn:hover {
+  background-color: #e4f0fb;
+  border-color: #b1cae7;
+}
+
+.services-pagination__btn--disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+.services-pagination__pages,
+.services-pagination__info {
+  font-size: 13px;
+  color: #7a8ca0;
+}
+
+/* Правая колонка – коробка записи */
 
 .landing-booking__right {
   display: flex;
   align-items: stretch;
 }
 
-.booking-box {
-  flex: 1;
-  background: linear-gradient(135deg, #e0f2fe, #eff6ff);
-  border-radius: 20px;
-  padding: 18px 18px 20px;
-  box-shadow: 0 18px 40px rgba(37, 99, 235, 0.17);
-  border: 1px solid rgba(129, 140, 248, 0.55);
-}
-
-.booking-box__title {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: #0f172a;
-}
-
-.booking-box__subtitle {
-  font-size: 14px;
-  color: #475569;
-  margin-bottom: 8px;
-}
-
-/* Можно заготовить зону для будущей формы/календаря */
-.booking-box__body {
-  margin-top: 10px;
-}
-
-
-
-
 /* ====== Booking box / віджет онлайн-запису ====== */
 
 .booking-box {
+  flex: 1;
   background: #ffffff;
   border-radius: 20px;
   padding: 16px 16px 20px;
@@ -440,6 +655,8 @@ body.booking-expanded .booking-box__close {
   cursor: pointer;
   font-size: 16px;
   padding: 2px 6px;
+  color: #40aff7;
+  font-weight: 700;
 }
 
 .booking-calendar__weekdays,
@@ -461,6 +678,8 @@ body.booking-expanded .booking-box__close {
   border-radius: 999px;
   cursor: pointer;
   font-size: 12px;
+  border: 1px solid #40aff7;
+  background: #e0f2fe;
 }
 
 .booking-calendar__day--outside {
@@ -476,7 +695,7 @@ body.booking-expanded .booking-box__close {
   color: #f8fafc;
 }
 
-/* Сітка розкладу */
+/* ====== Сітка розкладу ====== */
 
 .booking-schedule {
   margin-top: 12px;
@@ -503,13 +722,32 @@ body.booking-expanded .booking-box__close {
   color: #94a3b8;
 }
 
-/* Табличка */
+/* Табличка с прокруткой */
 
 .schedule-grid {
   border-radius: 16px;
   border: 1px solid #dbeafe;
-  overflow: hidden;
   background: #f9fafb;
+  max-height: 340px;
+  overflow-y: auto;
+
+  /* кастомный скролл */
+  scrollbar-width: thin;
+  scrollbar-color: #e0f2fe transparent;
+}
+
+.schedule-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.schedule-grid::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 999px;
+}
+
+.schedule-grid::-webkit-scrollbar-thumb {
+  background: #e0f2fe;
+  border-radius: 999px;
 }
 
 .schedule-grid__corner {
@@ -528,9 +766,9 @@ body.booking-expanded .booking-box__close {
 }
 
 .schedule-grid__doctors-item {
-  padding: 4px 6px;
+  padding: 4px 13px;
   font-size: 11px;
-  text-align: center;
+  text-align: right;
   color: #0f172a;
   white-space: nowrap;
 }
@@ -538,6 +776,13 @@ body.booking-expanded .booking-box__close {
 .schedule-grid__body {
   display: grid;
   grid-template-columns: auto 1fr;
+}
+
+/* одинаковая высота строк для времени и слотов */
+.schedule-grid__times,
+.schedule-grid__cells {
+  display: grid;
+  grid-auto-rows: 32px; /* высота одной полоски */
 }
 
 .schedule-grid__times {
@@ -551,12 +796,7 @@ body.booking-expanded .booking-box__close {
   color: #475569;
 }
 
-.schedule-grid__cells {
-  display: grid;
-  grid-auto-rows: 1fr;
-}
-
-/* кожен рядок часу — грід по лікарях */
+/* каждый ряд слотов по врачам */
 .schedule-grid__row {
   display: grid;
   grid-auto-flow: column;
@@ -571,6 +811,15 @@ body.booking-expanded .booking-box__close {
   position: relative;
 }
 
+/* контент по центру по вертикали */
+.schedule-grid__time-cell,
+.schedule-slot {
+  display: flex;
+  align-items: center;
+}
+
+/* свободный слот */
+
 .schedule-slot__btn {
   width: 100%;
   border-radius: 999px;
@@ -582,19 +831,45 @@ body.booking-expanded .booking-box__close {
   cursor: pointer;
 }
 
-.schedule-slot__btn--busy {
+/* ближайший свободный слот */
+
+.schedule-slot__btn--next {
   border-style: solid;
-  border-color: #cbd5f5;
-  background: #e5e7eb;
-  color: #6b7280;
-  cursor: default;
+  border-color: #22c55e;
+  background: #dcfce7;
+  color: #166534;
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.3);
 }
+
+/* занято */
 
 .schedule-slot__label-busy {
   font-size: 10px;
 }
 
-/* Модалка */
+.schedule-slot--off {
+  background: #f1f5f9;
+}
+
+.schedule-slot--hidden {
+  visibility: hidden;
+}
+
+/* перерыв / обед */
+
+.schedule-slot--break {
+  background: #fef3c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.schedule-slot__label-break {
+  font-size: 11px;
+  color: #92400e;
+}
+
+/* ====== Модалка ====== */
 
 .booking-modal {
   position: fixed;
@@ -705,9 +980,944 @@ body.booking-expanded .booking-box__close {
   color: #0369a1;
 }
 
+/* ====== Міні-модалка для неавторизованих користувачів ====== */
+
+.booking-auth-modal {
+  position: fixed;
+  inset: 0;
+  display: none; /* по замовчуванню схована */
+  align-items: center;
+  justify-content: center;
+  z-index: 110; /* трохи вище основного контенту */
+}
+
+.booking-auth-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.booking-auth-modal__dialog {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px 16px 12px;
+  max-width: 320px;
+  width: 100%;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
+  border: 1px solid #dbeafe;
+}
+
+.booking-auth-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.booking-auth-modal__content {
+  padding-top: 10px;
+}
+
+.booking-auth-modal__text {
+  font-size: 13px;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.booking-auth-modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #f9fafb;
+  box-shadow: 0 10px 24px rgba(56, 189, 248, 0.35);
+}
+
+.booking-auth-modal__btn:hover {
+  filter: brightness(1.05);
+}
+
+.booking-filters__field--branch {
+  position: relative;
+}
+
+/* обёртка дропдауна */
+.booking-branch-dropdown {
+  position: relative;
+}
+
+/* основная кнопка */
+.booking-branch-toggle {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.booking-branch-toggle:hover {
+  background: #e0f2fe;
+  border-color: #93c5fd;
+  box-shadow: 0 6px 14px rgba(148, 163, 184, 0.35);
+}
+
+.booking-branch-toggle__chevron {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* выпадающее меню поверх всего вниз */
+.booking-branch-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #dbeafe;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+  padding: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  display: none;
+  z-index: 30; /* поверх сетки и формы */
+}
+
+/* показываем меню, когда открыт дропдаун */
+.booking-branch-dropdown.is-open .booking-branch-menu {
+  display: block;
+}
+
+/* элементы меню */
+.booking-branch-option {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: #0f172a;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.booking-branch-option:hover {
+  background: #e0f2fe;
+}
+
+.booking-branch-option.is-active {
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #f9fafb;
+}
+
+/* скролл в меню */
+.booking-branch-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.booking-branch-menu::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 999px;
+}
+
+.booking-branch-menu::-webkit-scrollbar-thumb {
+  background: #e0f2fe;
+  border-radius: 999px;
+}
+
+.booking-branch-menu {
+  scrollbar-width: thin;
+  scrollbar-color: #e0f2fe transparent;
+}
 
 
-/* ====== Адаптив ====== */
+/* ====== Сторінка "Напрями лікування" ====== */
+
+.treatments-page {
+  padding: 32px 16px 40px;
+}
+
+.treatments-page__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.treatments-page__header {
+  margin-bottom: 20px;
+}
+
+.treatments-page__title {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: #0f172a;
+}
+
+.treatments-page__subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* обгортка для горизонтального скролу на мобілі */
+.treatment-grid-wrapper {
+  width: 100%;
+}
+
+/* сітка карток */
+.treatment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.landing-treatments__inner{
+  max-width: 1120px;
+  margin: auto;
+}
+
+.treatment-card {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.treatment-card__image {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  background: #e5f0ff;
+}
+
+.treatment-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* плейсхолдер */
+.treatment-card__image--placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #64748b;
+  background: repeating-linear-gradient(
+    45deg,
+    #e0f2fe,
+    #e0f2fe 6px,
+    #bfdbfe 6px,
+    #bfdbfe 12px
+  );
+}
+
+.treatment-card__body {
+  padding: 12px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.treatment-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.treatment-card__excerpt {
+  font-size: 13px;
+  color: #6b7280;
+  flex: 1;
+}
+
+.treatment-card__btn {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #f9fafb;
+  cursor: pointer;
+  transition: filter 0.16s ease, box-shadow 0.16s ease;
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+}
+
+.treatment-card__btn:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 14px 30px rgba(79, 70, 229, 0.4);
+}
+
+/* пагінація */
+
+.treatment-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
+.treatment-pagination__btn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #d0dde8;
+  color: #0ea5e9;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.treatment-pagination__btn:hover {
+  background-color: #e4f0fb;
+  border-color: #b1cae7;
+}
+
+.treatment-pagination__btn--disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+.treatment-pagination__info {
+  color: #55657a;
+}
+
+/* Детальна сторінка */
+
+.treatment-detail {
+  padding: 32px 16px 40px;
+}
+
+.treatment-detail__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.treatment-detail__header {
+  margin-bottom: 20px;
+}
+
+.treatment-detail__back-btn {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: #0ea5e9;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 6px;
+}
+
+.treatment-detail__title {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: #0f172a;
+}
+
+.treatment-detail__subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* двоколонковий layout */
+.treatment-detail__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: 24px;
+}
+
+.treatment-detail__image {
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  background: #e5f0ff;
+}
+
+.treatment-detail__image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.treatment-detail__article h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.treatment-detail__text {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.treatment-detail__points {
+  margin-top: 16px;
+}
+
+.treatment-detail__points h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.treatment-detail__points ul {
+  padding-left: 18px;
+  margin: 0;
+}
+
+.treatment-detail__points li {
+  font-size: 14px;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+/* сайдбар */
+
+.treatment-detail__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.treatment-detail__box {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  padding: 12px 12px 10px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.treatment-detail__box h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.treatment-detail__services {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.treatment-detail__services li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.treatment-detail__service-name {
+  color: #111827;
+}
+
+.treatment-detail__service-price {
+  color: #0ea5e9;
+  white-space: nowrap;
+}
+
+.treatment-detail__more {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.treatment-detail__more a {
+  font-size: 13px;
+  color: #0ea5e9;
+  text-decoration: none;
+}
+
+.treatment-detail__more a:hover {
+  text-decoration: underline;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ====== СЕКЦІЯ КОНТАКТІВ ====== */
+
+.landing-contacts {
+  padding: 56px 0 64px;
+  background: #f3f7fb;
+}
+
+.landing-contacts__inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.landing-contacts__header {
+  margin-bottom: 20px;
+}
+
+.landing-contacts__title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.landing-contacts__subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* ТАБИ ФІЛІЙ (верхня лінія) */
+
+.contacts-branches__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.contacts-branch-tab {
+  border: none;
+  background: #cffafe;
+  color: #0f172a;
+  border-radius: 999px;
+  padding: 6px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(34, 211, 238, 0.35);
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.1s ease;
+}
+
+.contacts-branch-tab.is-active {
+  background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(14, 165, 233, 0.5);
+  transform: translateY(-1px);
+}
+
+.contacts-branch-tab:hover:not(.is-active) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(34, 211, 238, 0.45);
+}
+
+/* ДВІ КОЛОНКИ: ФІЛІЯ + КАРТА */
+
+.contacts-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: stretch;
+}
+
+/* Ліва частина */
+
+.contacts-layout__left {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: rgba(224, 242, 254, 0.6);
+  border-radius: 26px;
+  padding: 16px 16px 18px;
+  box-shadow: 0 16px 32px rgba(148, 163, 184, 0.25);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.contacts-branch-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 12px 14px 10px;
+  box-shadow: 0 8px 20px rgba(148, 163, 184, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.contacts-branch-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+.contacts-branch-card__row {
+  display: flex;
+  gap: 6px;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.contacts-branch-card__label {
+  min-width: 60px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.contacts-branch-card__value {
+  color: #111827;
+}
+
+.contacts-branch-card__value a {
+  color: #0ea5e9;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.contacts-branch-card__value a:hover {
+  text-decoration: underline;
+}
+
+/* Соцмережі 2×2 */
+
+.contacts-social-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.contacts-social-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(191, 219, 254, 0.9);
+  box-shadow: 0 10px 22px rgba(148, 163, 184, 0.35);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.contacts-social-tile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(148, 163, 184, 0.45);
+  background: #f9fafb;
+}
+
+.contacts-social-tile__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.contacts-social-tile__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+/* цветовые акценты для соцсетей */
+
+.contacts-social-tile--ig .contacts-social-tile__icon {
+  background: linear-gradient(135deg, #fce7f3, #e0f2fe);
+  color: #be185d;
+}
+
+.contacts-social-tile--fb .contacts-social-tile__icon {
+  background: #e0f2fe;
+  color: #1d4ed8;
+}
+
+.contacts-social-tile--yt .contacts-social-tile__icon {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.contacts-social-tile--tt .contacts-social-tile__icon {
+  background: #ecfeff;
+  color: #0f766e;
+}
+
+/* Права частина — карта */
+
+.contacts-layout__right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contacts-map-card {
+  position: relative;
+  border-radius: 26px;
+  overflow: hidden;
+  background: radial-gradient(circle at top left, #e0f2fe, #e5e7eb);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.3);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  min-height: 240px;
+}
+
+.contacts-map-card__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 12% 0%, rgba(59, 130, 246, 0.35), transparent 52%);
+  pointer-events: none;
+}
+
+.contacts-map-card__frame {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 260px;
+  border: 0;
+  border-radius: 26px;
+}
+
+.contacts-map-card__link {
+  font-size: 14px;
+  color: #0ea5e9;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.contacts-map-card__link::after {
+  content: "↗";
+  font-size: 12px;
+}
+
+.contacts-map-card__link:hover {
+  text-decoration: underline;
+}
+
+/* НИЖНЯ ЛІНІЯ: ПІЛЮЛІ ГРАФІКА */
+
+.contacts-schedule-pills {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.contacts-schedule-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #d5f8ffdb;
+    color: #0f172a;
+    font-size: 13px;
+    box-shadow: inset 0px 0px 4px 0px rgb(0 0 0 / 29%);
+    white-space: nowrap;
+}
+
+.contacts-schedule-pill__day {
+  font-weight: 600;
+}
+
+.contacts-schedule-pill__time {
+  font-weight: 400;
+  color: #0369a1;
+}
+
+.contacts-schedule-pill--closed {
+    background: #fee2e2;
+    box-shadow: inset 0px 0px 3px rgb(0 0 0 / 40%);
+}
+
+.contacts-schedule-pill--closed .contacts-schedule-pill__time {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+/* Адаптив */
+
+@media (max-width: 900px) {
+  .contacts-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .landing-treatments__header{
+    margin-left: 5px;
+  }
+
+  .contacts-layout__right {
+    order: -1;
+  }
+
+  .contacts-layout__right,
+  .contacts-layout__left {
+    border-radius: 22px;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-contacts {
+    padding: 40px 0 48px;
+  }
+  .contacts-branches__tabs {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 35px;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+
+  .landing-contacts__title {
+    font-size: 22px;
+  }
+
+  .contacts-social-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contacts-map-card__frame {
+    height: 100%;
+  }
+
+  .contacts-schedule-pill {
+    font-size: 12px;
+  }
+}
+
+
+
+@media (max-width: 640px) {
+  .contacts-branch-panel__chips {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contacts-shell {
+    padding: 16px 14px 14px;
+    border-radius: 22px;
+  }
+
+  .contacts-map__frame {
+    height: 180px;
+  }
+}
+
+
+/* Адаптив */
+@media (max-width: 600px) {
+  .contacts-schedule-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+@media (max-width: 900px) {
+  .landing-contacts__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-contacts__right {
+    order: -1;
+  }
+}
+
+
+/* Адаптив */
+
+@media (max-width: 900px) {
+  .treatment-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding: 10px;
+  }
+
+  .treatment-card {
+    flex: 0 0 240px;
+  }
+
+  .treatment-grid-wrapper {
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .treatment-grid-wrapper::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .treatment-grid-wrapper::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 999px;
+  }
+
+  .treatment-grid-wrapper::-webkit-scrollbar-thumb {
+    background: #e0f2fe;
+    border-radius: 999px;
+  }
+
+  .treatment-detail__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .treatment-detail__sidebar {
+    order: -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .treatments-page__title,
+  .treatment-detail__title {
+    font-size: 22px;
+  }
+}
+
+
+/* ====== АДАПТИВ ====== */
 
 @media (max-width: 900px) {
   .landing-hero__inner,
@@ -717,6 +1927,20 @@ body.booking-expanded .booking-box__close {
 
   .landing-hero__info {
     order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-doctors__inner {
+    padding-inline: 12px;
+  }
+
+  .doctor-card {
+    flex: 0 0 230px;
+  }
+
+  .doctor-card__inner {
+    height: 300px;
   }
 }
 

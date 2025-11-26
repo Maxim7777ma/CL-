@@ -19,4 +19,10 @@ urlpatterns = [
 
     path("api/day-schedule/", views.api_day_schedule, name="api_day_schedule"),
     path("api/create-appointment/", views.api_create_appointment, name="api_create_appointment"),
+    path(
+        "treatments/<slug:slug>/",
+        views.treatment_category_detail,
+        name="treatment_category_detail",
+    ),
+
 ]

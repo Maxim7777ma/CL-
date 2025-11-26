@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ category.title }} — стоматологія{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/treatment-detail.css' %}">
+{% endblock %}
+
+{% block body_class %}page-treatment-detail{% endblock %}
+
+{% block content %}
+
+<section class="td-section">
+  <div class="td-container">
+
+    {# Верхний блок: заголовок + кнопка закрытия #}
+    <div class="td-header">
+      <div class="td-header-main">
+        <p class="td-label">Категорія лікування</p>
+        <h1 class="td-title">{{ category.title }}</h1>
+      </div>
+
+      <a href="{% url 'index' %}#landing-treatments" class="td-close" aria-label="Повернутися до списку напрямків">
+        ✕
+      </a>
+    </div>
+
+    <div class="td-layout">
+
+      {# Левая колонка #}
+      <aside class="td-aside">
+
+        <div class="td-image-wrap">
+          {% if category.image %}
+            <img src="{{ category.image.url }}"
+                 alt="{{ category.title }}"
+                 loading="lazy"
+                 class="td-image">
+          {% else %}
+            <div class="td-image-placeholder">
+              <span>Зображення буде додано</span>
+            </div>
+          {% endif %}
+        </div>
+
+        {# Короткий опис (ті самі 2–3 речення, що й на картці) #}
+        {% if category.short_description %}
+          <p class="td-short">
+            {{ category.short_description }}
+          </p>
+        {% endif %}
+
+        {# Пов’язані послуги #}
+        {% if related_services %}
+          <div class="td-services">
+            <h3 class="td-subtitle">Послуги у цьому напрямку</h3>
+
+            <ul class="td-service-list">
+              {% for service in related_services %}
+                <li class="td-service-item">
+                  <span class="td-service-name">{{ service.name }}</span>
+                  {% if service.price_from %}
+                    <span class="td-service-price">від {{ service.price_from }} грн</span>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      </aside>
+
+      {# Правая колонка: ключевые пункты + полный текст #}
+      <div class="td-content">
+
+        {# Вступный абзац можно оставить коротким (повтор short_description), если нужно — можно будет убрать #}
+        {% if category.short_description %}
+          <div class="td-intro">
+            {{ category.short_description|linebreaks }}
+          </div>
+        {% endif %}
+
+        {# 4 ключові пункти (показання/переваги/особливості) #}
+        {% if category.point_1 or category.point_2 or category.point_3 or category.point_4 %}
+          <div class="td-keys">
+
+            {% if category.point_1 %}
+              <div class="td-key">
+                <div class="td-key-num">1</div>
+                <div class="td-key-text">
+                  {{ category.point_1 }}
+                </div>
+              </div>
+            {% endif %}
+
+            {% if category.point_2 %}
+              <div class="td-key">
+                <div class="td-key-num">2</div>
+                <div class="td-key-text">
+                  {{ category.point_2 }}
+                </div>
+              </div>
+            {% endif %}
+
+            {% if category.point_3 %}
+              <div class="td-key">
+                <div class="td-key-num">3</div>
+                <div class="td-key-text">
+                  {{ category.point_3 }}
+                </div>
+              </div>
+            {% endif %}
+
+            {% if category.point_4 %}
+              <div class="td-key">
+                <div class="td-key-num">4</div>
+                <div class="td-key-text">
+                  {{ category.point_4 }}
+                </div>
+              </div>
+            {% endif %}
+
+          </div>
+        {% endif %}
+
+        {# Повний опис з адмінки (основний текст статті) #}
+        {% if category.full_description %}
+          <div class="td-body">
+            {{ category.full_description|linebreaks }}
+          </div>
+        {% endif %}
+
+        <div class="td-cta">
+          <a href="{% url 'index' %}#online-booking" class="td-btn">
+            Записатися на консультацію
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {# Блок "Інші напрямки лікування" #}
+    {% if other_categories %}
+      <section class="td-other">
+        <h2 class="td-other-title">Інші напрямки лікування</h2>
+
+        <div class="td-other-grid">
+          {% for item in other_categories %}
+            <a href="{% url 'treatment_category_detail' item.slug %}" class="td-other-card">
+              <div class="td-other-img-wrap">
+                {% if item.image %}
+                  <img src="{{ item.image.url }}"
+                       alt="{{ item.title }}"
+                       loading="lazy">
+                {% else %}
+                  <div class="td-other-placeholder"></div>
+                {% endif %}
+              </div>
+
+              <div class="td-other-body">
+                <h3>{{ item.title }}</h3>
+                {% if item.short_description %}
+                  <p>{{ item.short_description|truncatewords:18 }}</p>
+                {% endif %}
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+  </div>
+</section>
+
+{% endblock %}
